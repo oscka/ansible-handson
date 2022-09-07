@@ -21,8 +21,10 @@ ansible-galaxy init test-role
 ansible-playbook -i hosts-vm playbook-step3.yml --list-tag 
 # task list 조회
 ansible-playbook -i hosts-vm playbook-step3.yml --list-tasks
-
-
-
 ansible-playbook -i hosts-vm playbook-step3.yml -t "kubectl"
+```
+
+실행을 위해서 각 step의 hosts-vm 파일의 다음 경로를 맞게 수정해야 함
+```
+ansible_ssh_private_key_file=/home/ska/git/study/ansible/test-vm1/ # --> vagrant ssh-config로 확인하여 경로에 맞게 수정
 ```
