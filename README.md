@@ -24,7 +24,10 @@ ansible-playbook -i hosts-vm playbook-step3.yml --list-tasks
 ansible-playbook -i hosts-vm playbook-step3.yml -t "kubectl"
 ```
 
-실행을 위해서 각 step의 hosts-vm 파일의 다음 경로를 맞게 수정해야 함
+실행을 위해서 각 step의 hosts-vm 파일의 IP 및 경로를 맞게 수정해야 함
 ```
-ansible_ssh_private_key_file=/home/ska/git/study/ansible/test-vm1/ # --> vagrant ssh-config로 확인하여 경로에 맞게 수정
+ansible_host=192.168.56.10 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/study/ansible/test-vm1/.vagrant/machines/default/virtualbox/private_key
+# ansible_host=192.168.56.10 -> private_ip를 맞게 수정
+# ansible_ssh_private_key_file=/home/ska/git/study/ansible/test-vm1/ # --> vagrant ssh-config로 확인하여 경로에 맞게 수정
 ```
+기본적으로 vagrant를 기반으로 수행할 수 있도록 구성(vagrant 계정으로 실행되어 sudo권한이 기본적으로 부여되어 있음)
