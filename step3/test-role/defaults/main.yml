@@ -1,0 +1,3 @@
+---
+# defaults file for test-role
+K9S_VERSION: "v0.25.21"

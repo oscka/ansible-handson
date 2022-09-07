@@ -1,0 +1,15 @@
+- name: My first play
+  hosts: step1  ## all,
+  tasks:
+
+  - name: "[pre] apt update"
+    # apt:
+    #   update_cache: yes
+    shell:
+      apt update
+    become: true  # root권한으로 하겠다
+
+  - name: "kubectl 설치"
+    shell: |
+      curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl

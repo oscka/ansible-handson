@@ -1,0 +1,8 @@
+---
+# tasks file for test-role
+
+- name: install pre-post
+  import_tasks: pre-post.yml
+
+- name: install on k8s tool 
+  import_tasks: k8s-tool/k8s-tool.yml  

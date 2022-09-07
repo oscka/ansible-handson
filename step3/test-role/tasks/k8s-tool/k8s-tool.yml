@@ -1,0 +1,35 @@
+---
+- name: "kubectl 설치"
+  shell: |
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl 
+  tags: 
+    - kubectl 
+    - k8s-basic
+
+# - name: k9s 설치
+#   shell: |   
+#     curl -sL https://github.com/derailed/k9s/releases/download/v0.25.21/k9s_Linux_x86_64.tar.gz | sudo tar xfz - -C /usr/local/bin k9s
+#   tags: 
+#     - k9s 
+#     - k8s-basic
+
+- name: k9s 설치
+  shell: |   
+    curl -sL https://github.com/derailed/k9s/releases/download/{{K9S_VERSION}}/k9s_Linux_x86_64.tar.gz | sudo tar xfz - -C /usr/local/bin k9s
+  tags: 
+    - k9s 
+    - k8s-basic
+
+- name: Add kubectl completion to /home/{{ ansible_user }}/.bashrc
+  lineinfile:
+    path: /home/{{ ansible_user }}/.bashrc
+    line: |
+      source <(kubectl completion bash)
+
+      alias k=kubectl
+      complete -F __start_kubectl k
+    mode: 0644
+  tags: 
+    - k9s 
+    - k8s-basic
