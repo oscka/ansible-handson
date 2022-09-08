@@ -1,0 +1,11 @@
+---
+# vars file for k8s-app-role
+
+user:
+  NAME: "{{ ansible_user }}"
+component:
+  INSTALL_ROOT: /home/{{ ansible_user }}/install
+
+
+  
+

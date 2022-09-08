@@ -1,0 +1,76 @@
+---
+
+    
+######## argocd #########
+
+- name: "[필수사항 체크] Ingress Controller 설치 여부 체크"
+  ansible.builtin.shell: | 
+    kubectl get pod -n {{GLB_INGRESS_NAMESPACE}} | grep {{ARGOCD_INGRESS_CLASS}} |wc -l
+  register: output
+  failed_when:  "output.stdout|float < 1"
+  tags:
+    - argocd
+
+- name: argocd 설치
+  shell: |
+    kubectl create ns argocd
+    kubectl -n argocd apply  -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n argocd  > /dev/null
+  
+  register: output
+  tags: 
+    - argocd
+
+- name: argo-rollouts 설치 
+  shell: |
+    kubectl create ns argo-rollouts
+    kubectl apply -n argo-rollouts  -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+    kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n  argo-rollouts  > /dev/null
+  register: output
+  tags:
+    - argo-rollouts
+    - argocd
+  when: ARGO_ROLLOUTS_YN == 'Y' 
+
+
+- name: argocd ingress 설치 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "argocd/argocd-ingress.yml.j2"
+  register: output
+  tags: 
+    - argocd-ing
+    - argocd
+  when: ARGOCD_INGRESS_YN == 'Y' and ARGOCD_INGRESS_CLASS == 'nginx'
+
+- debug:
+    var: output
+  tags: 
+    - argocd-ing
+    - argocd
+
+- name: agrocd  change account password
+  shell: |
+    PASSWORD="$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo )"
+    argocd login --insecure {{ARGOCD_HOST}}  --username admin  --password $PASSWORD 
+    argocd account update-password --current-password $PASSWORD  --new-password {{ARGOCD_NEW_PASSWORD}}
+  register: output
+  tags: 
+    - arogocd-pwd
+    - argocd
+  when: ARGOCD_INGRESS_YN == 'Y'
+
+- debug:
+    var: output
+  tags:
+    - arogocd-pwd
+    - argocd
+  when: ARGOCD_INGRESS_YN == 'Y'
+
+
+
+
+
+
+

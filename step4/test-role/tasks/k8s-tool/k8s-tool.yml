@@ -1,0 +1,108 @@
+---
+
+- name: "docker 설치"
+  shell: |  
+    curl -fsSL https://get.docker.com/ | sudo sh 
+    sudo usermod -a -G docker {{USER_NAME}}
+  args:
+    chdir: "{{ INSTALL_DOWN_ROOT }}/down/"
+ 
+  tags: 
+    - docker
+    - k8s-basic
+- name: Start docker 
+  service:
+    name: docker
+    state: restarted
+  become: true
+  tags: 
+    - docker-restart
+    - docker
+    - k8s-basic
+
+- name: reset ssh connection to allow user changes to affect 'current login user'
+  meta: reset_connection
+  tags: 
+    - docker-restart
+    - docker
+    - k8s-basic
+- name: docker check  
+  shell: |
+    docker ps 
+  register: output
+  tags: 
+    - docker-check
+    - k8s-basic
+    
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - docker-restart
+    - tool-basic
+    - k8s-basic
+
+- name: "k3d cli 설치"
+  shell: |
+    curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG={{K3D_TAG_VER}} bash
+    echo "============= k3d version ==============="
+    k3d version
+  register: output
+  tags: 
+    - k3d-cli
+    - tool-basic
+    - k8s-basic
+
+- name: "kubectl 설치"
+  shell: |
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl 
+  args:
+    chdir: "{{ INSTALL_DOWN_ROOT }}/down/"
+  tags: 
+    - kubectl
+    - k8s-basic
+
+- name: k9s 설치
+  shell: |   
+    curl -sL https://github.com/derailed/k9s/releases/download/{{K9S_VERSION}}/k9s_Linux_x86_64.tar.gz | sudo tar xfz - -C /usr/local/bin k9s
+  tags: 
+    - k9s 
+    - k8s-basic
+
+- name: argocd-cli 설치 
+  shell: |
+    sudo curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+    sudo chmod +x /usr/local/bin/argocd
+  args:
+    chdir: "{{ INSTALL_DOWN_ROOT }}/down/"
+  tags: 
+    - argocd-cli 
+    - k8s-basic
+
+- name: helm3 설치
+  shell: |
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    chdir: "{{ INSTALL_DOWN_ROOT }}/down/"
+
+  tags: 
+    - helm3 
+    - k8s-basic
+
+- name: Add kubectl completion to /home/{{ ansible_user }}/.bashrc
+  lineinfile:
+    path: /home/{{ ansible_user }}/.bashrc
+    line: |
+      alias k=kubectl 
+    mode: 0644
+  tags: 
+    - alias 
+    - k8s-basic
+
+- name: Print all available facts
+  ansible.builtin.debug:
+    var: ansible_facts
+  tags: 
+    - facts
+

@@ -1,0 +1,54 @@
+---
+# defaults file for test-role
+
+
+# HOSTS: "vms"
+# HOST_IP: "{{ansible_host}}"
+
+# INSTALL_DOWN_ROOT: /home/{{ ansible_user }}/dev-tools
+# LOCAL_USER_HOME: "/Users/blackstar"
+
+# #### tools ###
+
+# K9S_VERSION: v0.25.21 
+
+# USER_NAME: "{{ ansible_user }}"
+
+# ### k8s-apps ###
+
+# ########## 공통 #################
+# ## helm repo update
+# HELM_UPDATE_REPO_CACHE: false
+
+# ########## k3d #################
+# #K3D_TRAEFIK_INSTALL_YN: "N"  ## traefik ingress Controller 설치여부(default=N)
+# K3D_ClUSTER_NAME: "my-cluster" 
+# K3D_HOST_IP: "0.0.0.0"
+# K3D_HOST_PORT: 6443
+# K3D_AGENT: 2
+# # nodeport range :  30000~32767
+# K3D_EXTRA_PORT1: 9000 
+# K3D_EXTRA_PORT2: 9700  
+# K3D_EXTRA_PORT3: 32180  
+# K3D_EXTRA_PORT4: 32181 
+# K3D_OPTIONS_ARG1: "--disable=traefik"
+
+# # k3d command로 설치시 
+# K3D_OPTIONS1: " --k3s-arg '--disable=traefik@server:0'"
+
+# ########## glb_ingress_namespace #################
+# GLB_INGRESS_NAMESPACE: "ingress-nginx"
+
+# ########## ingress-nginx #################
+# INGRESS_NGINX_NAMESPACE: ingress-nginx
+# INGRESS_NGINX_CHART: "ingress-nginx/ingress-nginx"
+# INGRESS_NGINX_CHART_VERSION: "4.2.0" 
+# INGRESS_NGINX_ENABLE_SSLPASSTHROUGH: "Y"
+
+
+# ########## argocd #################
+# ARGOCD_INGRESS_CLASS: "nginx"  ## ingress (default=nginx)
+# ARGOCD_HOST: "argocd.{{HOST_IP}}.sslip.io"  ## argocd server host (default=argocd.127.0.0.1.sslip.io)
+# ARGOCD_NEW_PASSWORD: "admin1234" ## argocd admin password(default=admin1234)
+# ARGO_ROLLOUTS_YN: "N"    ## argo rollouts 설치 여부(default=N)
+# ARGOCD_INGRESS_YN: "Y"

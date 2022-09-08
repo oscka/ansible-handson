@@ -1,0 +1,26 @@
+---
+# tasks file for test-role
+
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_distribution }}.yml"
+  tags: always
+
+###### [pre]
+- name: install pre-post
+  import_tasks: pre-install.yml
+
+- name: install on k8s tool 
+  import_tasks: k8s-tool/k8s-tool.yml  
+
+- name: install on k8s 
+  import_tasks: k8s/dev-k8s.yml
+
+- name: install on ingress 
+  import_tasks: ingress/ingress-controller.yml
+
+- name: install on cicd 
+  import_tasks: cicd/cicd.yml
+
+###### [post]
+- name: post install 
+  import_tasks: post-install.yml

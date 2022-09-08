@@ -1,0 +1,86 @@
+---
+######## k3d #########
+
+- name: " k3d 디렉토리 생성"
+  file:
+    path: "{{ component.INSTALL_ROOT }}/k3d"
+    state: directory
+  tags: 
+    - k3d-dir
+    - k3d 
+    - k8s-basic
+   
+
+- name: k3d config-file  업로드 서버로
+  template:
+    src: k3d/k3d-config.yml.j2
+    dest: "{{ component.INSTALL_ROOT }}/k3d/k3d-config.yml"
+  tags: 
+    - k3d-config-up
+    - k3d 
+    - k8s-basic
+
+
+
+- name: k3d 설치 
+  shell: |
+    k3d cluster create --config  {{ component.INSTALL_ROOT }}/k3d/k3d-config.yml --wait
+    k3d kubeconfig write {{K3D_ClUSTER_NAME}} 
+  register: output
+  tags: 
+    - k3d 
+    - k8s-basic   
+    
+- debug:
+    var: output
+  tags: 
+    - k3d
+    - k8s-basic
+
+- name: waiting for pod status Ready
+  shell: |
+      kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n kube-system
+  tags: 
+    - k3d
+    - k8s-basic
+
+- name: k3d command로 설치시 
+  shell: |
+    k3d cluster create {{K3D_ClUSTER_NAME}}  \
+        --agents {{K3D_AGENT}} \
+        -p 80:80@loadbalancer \
+        -p 443:443@loadbalancer \
+        -p {{K3D_EXTRA_PORT1}}:{{K3D_EXTRA_PORT1}}@loadbalancer \
+        -p {{K3D_EXTRA_PORT2}}:{{K3D_EXTRA_PORT2}}@loadbalancer \
+        -p {{K3D_EXTRA_PORT3}}:{{K3D_EXTRA_PORT3}}@loadbalancer \
+        -p {{K3D_EXTRA_PORT4}}:{{K3D_EXTRA_PORT4}}@loadbalancer \
+        {{K3D_OPTIONS1}} --wait
+  register: output
+  tags: 
+    - k3d-install-cmd
+
+#    
+
+- name: "k3d fetch remote kubeconfig"
+  ansible.builtin.fetch:
+    src: "/home/{{ansible_user}}/.k3d/kubeconfig-{{K3D_ClUSTER_NAME}}.yaml"
+    dest: "{{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig"
+    flat: yes
+  tags: 
+    - k3d-config-fetch
+    - k3d
+    - k8s-basic
+  when: ansible_distribution == 'Ubuntu'
+
+- name: "kubeconfig remote.ip replace"
+  local_action: shell
+    sed -i '' 's/0.0.0.0/{{ansible_host}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig
+  tags: 
+    - k3d-config-sed
+    - k3d
+    - k8s-basic
+  when: ansible_distribution == 'Ubuntu'
+
+
+
+

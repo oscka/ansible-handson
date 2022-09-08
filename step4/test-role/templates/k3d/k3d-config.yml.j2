@@ -1,0 +1,39 @@
+### k3d version v5.2.2 (k3d.io/v1alpha3 ) config format  
+
+apiVersion: k3d.io/v1alpha3 
+kind: Simple 
+name: {{K3D_ClUSTER_NAME}}  
+servers: 1 
+agents: {{K3D_AGENT}}
+kubeAPI:
+  # host: "3.39.19.175" 
+  hostIP: "{{K3D_HOST_IP}}" 
+  hostPort: "{{K3D_HOST_PORT}}"
+ports:
+  - port: 80:80 
+    nodeFilters:
+      - loadbalancer
+  - port: 443:443 
+    nodeFilters:
+      - loadbalancer
+  - port: {{K3D_EXTRA_PORT1}}:{{K3D_EXTRA_PORT1}} 
+    nodeFilters:
+      - loadbalancer
+  - port: {{K3D_EXTRA_PORT2}}:{{K3D_EXTRA_PORT2}} 
+    nodeFilters:
+      - loadbalancer
+  - port: {{K3D_EXTRA_PORT3}}:{{K3D_EXTRA_PORT3}} 
+    nodeFilters:
+      - loadbalancer
+  - port: {{K3D_EXTRA_PORT4}}:{{K3D_EXTRA_PORT4}} 
+    nodeFilters:
+      - loadbalancer
+options:
+  k3s: 
+    extraArgs: 
+      - arg: --tls-san={{ansible_host}}
+        nodeFilters:
+          - server:*
+      - arg: {{K3D_OPTIONS_ARG1}}
+        nodeFilters:
+          - server:*

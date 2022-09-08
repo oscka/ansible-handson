@@ -1,0 +1,4 @@
+---
+- hosts: vms
+  roles: # 여러개 등록할 수 있음
+    - role: "../test-role"
