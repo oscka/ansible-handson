@@ -5,13 +5,12 @@
 HOSTS: "vms"
 HOST_IP: "{{ansible_host}}"
 
-INSTALL_DOWN_ROOT: /home/{{ ansible_user }}/dev-tools
-LOCAL_USER_HOME: "/Users/blackstar"  # 경로 로컬환경에 맞게 수정해야 함
+INSTALL_DOWN_ROOT: /home/{{ ansible_user }}/dev-tools # 로컬 다운로드용 임시공간
+LOCAL_USER_HOME: "/home/ska"  # 경로 로컬환경에 맞게 수정해야 함
 
 #### tools ###
 
 K9S_VERSION: v0.25.21 
-
 USER_NAME: "{{ ansible_user }}"
 
 ### k8s-apps ###

@@ -88,7 +88,9 @@ ansible-playbook -i hosts-vm playbook-step1.yml -t "pre, docker, k9s"
 
 ### Step3
 
-role을 생성하여 좀 더 복잡한 설치를 수행할 수 있도록 합니다. role은 ansible-galaxy라는 명령으로 생성하며 일종의 ansible을 위한 템플릿 프로젝트를 만들어 줍니다.(spring initializer 처럼)
+Step3에서는 role을 기반으로 좀 더 구성화된 ansible 스크립트를 작성합니다.
+
+ansible은 role을 생성하여 좀 더 복잡한 설치를 수행할 수 있도록 합니다. role은 ansible-galaxy라는 명령으로 생성하며 일종의 ansible을 위한 템플릿 프로젝트를 만들어 줍니다.(spring initializer 처럼)
 
 ```bash
 # role 생성
@@ -128,17 +130,27 @@ role은 생성시 다음과 같은 구조와 용도를 가집니다.
 
 ### Step4
 
+Step4에서는 k3d 기반으로 클러스터를 설치하고 클러스터에 argocd를 설치하여 cd환경을 구성하는 것 까지를 수행하며, 좀 더 편한 실행을 위해 shell script를 이용하여 제어합니다.
 
-```
-
-
-
-```
-
-
+설치 및 테스트를 위해 playbooks 디렉토리 하위의 다음 shell script들을 이용합니다.
 
 ```bash
+# 스크립트 실행
+run-vm.sh  
+# 핑 테스트
+./show-ping-test.sh
+# 태그 조회
+./show-tags-run-all.sh
+# 아래 옵션은 host에 대해 key를 등록한 적이 있는지를 확인하지 않음
+export ANSIBLE_HOST_KEY_CHECKING=False
+```
 
+설치 스크립트는 step3와 동일하게 role로 구성됩니다.
 
+defaults 에는 다음과 같이 기본 설정값들이 들어갑니다.
+
+```yaml
+INSTALL_DOWN_ROOT: /home/{{ ansible_user }}/dev-tools # 로컬 다운로드용 임시공간
+LOCAL_USER_HOME: "/home/ska"  # 경로 로컬환경에 맞게 수정해야 함
 ```
 
