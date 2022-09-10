@@ -75,11 +75,11 @@ apt, shell등은 ansible의 builtin 모듈입니다. 기본 모듈이기 때문�
 
 ### Step2
 
-
+step2는 Docker와 k9s를 설치하고 구동합니다. step1 보다는 다소 복잡한 작업을 수행합니다.
 
 각 ansible task들은 tag를 지정할 수 있으며 차후 설치 편의를 위해 task마다 적당한 이름을 붙여 넣습니다.
 
-tag는 여러개를 한번에 넣어 순차적으로 실행되도록 할 수도 있고, 빠진 하나의 task만 실행되도록 할 수 있습니다.
+tag는 여러개를 한번에 넣어 순차적으로 실행되도록 할 수도 있고, 빠진 하나의 task만 실행되도록 할 수 있습니다. tag를 특정하지 않을 경우 전체가 기본으로 수행됩니다.
 
 ```bash
 # 해당 tag 만 실행
@@ -88,7 +88,7 @@ ansible-playbook -i hosts-vm playbook-step1.yml -t "pre, docker, k9s"
 
 ### Step3
 
-role을 생성하여 좀 더 복잡한 설치를 수행할 수 있도록 합니다.
+role을 생성하여 좀 더 복잡한 설치를 수행할 수 있도록 합니다. role은 ansible-galaxy라는 명령으로 생성하며 일종의 ansible을 위한 템플릿 프로젝트를 만들어 줍니다.(spring initializer 처럼)
 
 ```bash
 # role 생성
@@ -99,6 +99,31 @@ ansible-playbook -i hosts-vm playbook-step3.yml --list-tag
 ansible-playbook -i hosts-vm playbook-step3.yml --list-tasks
 # ex
 ansible-playbook -i hosts-vm playbook-step3.yml -t "kubectl"
+```
+
+role은 생성시 다음과 같은 구조와 용도를 가집니다.
+
+```
+├── hosts-vm
+├── playbook-step3.yml
+└── test-role
+    ├── README.md
+    ├── defaults       # role이 사용될 때 기본으로 사용되는 변수값
+    │   └── main.yml
+    ├── handlers       # 핸들러정보(차후)
+    │   └── main.yml
+    ├── meta           # 롤의 메타정보(라이센스 등)
+    │   └── main.yml
+    ├── tasks          # 실제 수행되는 태스크
+    │   ├── k8s-tool
+    │   │   └── k8s-tool.yml
+    │   ├── main.yml  # 실제 수행될 메인 태스크
+    │   └── pre-post.yml
+    ├── tests          # 테스트(핸즈온에서는 무시)
+    │   ├── inventory
+    │   └── test.yml
+    └── vars           # 가변적 상황(OS,환경 등)에 대한 변수값
+        └── main.yml
 ```
 
 ### Step4
