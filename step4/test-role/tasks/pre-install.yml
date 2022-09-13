@@ -20,13 +20,21 @@
   tags: 
   - pre
 
-
 - name: "[pre] down 디렉토리 생성"
   file:
     path: "{{ INSTALL_DOWN_ROOT }}/down"
     state: directory
   tags: 
     - install-down
+    - pre
+
+- name: helm3 설치
+  shell: |
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    chdir: "{{ INSTALL_DOWN_ROOT }}/down/"
+  tags: 
+    - helm3 
     - pre
 
 - name: "pip 설치"
@@ -71,6 +79,7 @@
   tags: 
     - jenkins-repo
     - helm-repo
+
 ############### helm repo update ####################
 - name: helm repo update
   shell: |
@@ -78,6 +87,8 @@
   tags: 
     - helm-update
     - helm-repo
+
+
 
 
    

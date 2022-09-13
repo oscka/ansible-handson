@@ -80,16 +80,6 @@
     - argocd-cli 
     - k8s-basic
 
-- name: helm3 설치
-  shell: |
-    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-  args:
-    chdir: "{{ INSTALL_DOWN_ROOT }}/down/"
-
-  tags: 
-    - helm3 
-    - k8s-basic
-
 - name: Add kubectl completion to /home/{{ ansible_user }}/.bashrc
   lineinfile:
     path: /home/{{ ansible_user }}/.bashrc

@@ -6,12 +6,10 @@ HOSTS: "vms"
 HOST_IP: "{{ansible_host}}"
 
 INSTALL_DOWN_ROOT: /home/{{ ansible_user }}/dev-tools
-LOCAL_USER_HOME: "/Users/blackstar"
+LOCAL_USER_HOME: "/home/ska"
 
 #### tools ###
-
 K9S_VERSION: v0.25.21 
-
 USER_NAME: "{{ ansible_user }}"
 
 ### k8s-apps ###
@@ -21,7 +19,7 @@ USER_NAME: "{{ ansible_user }}"
 HELM_UPDATE_REPO_CACHE: false
 
 ########## k3d #################
-K3D_TAG_VER: "v5.2.2"
+K3D_TAG_VER: "v5.2.2" # add
 #K3D_TRAEFIK_INSTALL_YN: "N"  ## traefik ingress Controller 설치여부(default=N)
 K3D_ClUSTER_NAME: "my-cluster" 
 K3D_HOST_IP: "0.0.0.0"

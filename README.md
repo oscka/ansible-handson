@@ -150,7 +150,9 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 defaults 에는 다음과 같이 기본 설정값들이 들어갑니다.
 
 ```yaml
+(...)
 INSTALL_DOWN_ROOT: /home/{{ ansible_user }}/dev-tools # 로컬 다운로드용 임시공간
 LOCAL_USER_HOME: "/home/ska"  # 경로 로컬환경에 맞게 수정해야 함
+(...)
 ```
 

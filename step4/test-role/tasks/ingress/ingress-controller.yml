@@ -2,7 +2,6 @@
 
 
 ######## nginx ingress controller #########
-
 - name: ingress-nginx  controller 설치 - ssl_passthrough 사용 (enable ssl_passthrough)
   kubernetes.core.helm:
     name: ingress-nginx
@@ -16,7 +15,6 @@
         extraArgs:
           enable-ssl-passthrough: true
   when: INGRESS_NGINX_ENABLE_SSLPASSTHROUGH == 'Y'
-     
   register: output
   tags: 
     - ingress-nginx
