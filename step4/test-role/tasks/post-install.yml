@@ -1,4 +1,13 @@
 ---
+
+  
+## bash shell 일때 
+- name: "[post] bash-alias configured"
+  script: scripts/bash-alias-script.sh 
+  tags: post
+  when: ansible_facts['user_shell'] == "/bin/bash"
+
+
 - name: "[post] install dev-tools 폴더 삭제"
   file:   
     path: "{{ INSTALL_DOWN_ROOT }}"
