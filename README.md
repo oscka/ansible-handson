@@ -208,7 +208,7 @@ task는 OS나 환경에 따라 실행되거나 되지 않도록 설정할 수 �
 
 설치 완료 후 로컬 -> VM의 클러스터로 접근하기 위해 다음과 같이 kubeconfig 설정을 해 줍니다. 설정시 로컬의 home디렉토리 경로에 맞게 지정되어야 합니다.
 
-```
+```bash
 export KUBECONFIG=/home/ska/.kube/k8s/kubeconfig
 ```
 
