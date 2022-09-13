@@ -21,8 +21,6 @@
     - k3d 
     - k8s-basic
 
-
-
 - name: k3d 설치 
   shell: |
     k3d cluster create --config  {{ component.INSTALL_ROOT }}/k3d/k3d-config.yml --wait

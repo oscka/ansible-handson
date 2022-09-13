@@ -135,8 +135,10 @@ Step4에서는 k3d 기반으로 클러스터를 설치하고 클러스터에 arg
 설치 및 테스트를 위해 playbooks 디렉토리 하위의 다음 shell script들을 이용합니다.
 
 ```bash
-# 스크립트 실행
-run-vm.sh  
+# 스크립트 실행(실행 권한이 없을 경우)
+sh run-vm.sh
+# 전체 설치
+sh run-vm.sh "pre, ansible-module, helm-repo, k8s-basic, argocd"
 # 핑 테스트
 ./show-ping-test.sh
 # 태그 조회
@@ -147,12 +149,66 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 
 설치 스크립트는 step3와 동일하게 role로 구성됩니다.
 
-defaults 에는 다음과 같이 기본 설정값들이 들어갑니다.
+defaults 에는 다음과 같이 기본 설정값들이 들어갑니다. "LOCAL_USER_HOME"의 변수는 로컬환경의 OS의 홈디렉토리로 수정해줘야 합니다.
+INSTALL_DOWN_ROOT 경로는 설치시 받아지는 임시 다운로드 디렉토리라고 생각하시면 됩니다. 설치가 완료되면 삭제됩니다.
 
 ```yaml
 (...)
 INSTALL_DOWN_ROOT: /home/{{ ansible_user }}/dev-tools # 로컬 다운로드용 임시공간
 LOCAL_USER_HOME: "/home/ska"  # 경로 로컬환경에 맞게 수정해야 함
 (...)
+```
+
+다음과 같은 task를 통해 templates 하위의 jinja2 설정 템플릿을 복사하여 설정 디렉토리에 넣고 맞는 변수값들을 할당하여 줍니다.
+
+```yaml
+- name: k3d config-file  업로드 서버로
+  template:
+    src: k3d/k3d-config.yml.j2
+    dest: "{{ component.INSTALL_ROOT }}/k3d/k3d-config.yml"
+  tags: 
+    - k3d-config-up
+    - k3d 
+    - k8s-basic
+```
+
+디버깅을 위해 output을 통해 실행 내용을 출력하도록 할 수 있습니다.
+
+```yaml
+#--[output]-- # 디버깅을 위해 등록
+- debug:
+    var: output
+  tags: 
+    - docker-restart
+    - tool-basic
+    - k8s-basic
+
+- name: "k3d cli 설치"
+  shell: |
+    curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG={{K3D_TAG_VER}} bash
+    echo "============= k3d version ==============="
+    k3d version
+  register: output   ##디버깅을 위해 등록
+  tags: 
+    - k3d-cli
+    - tool-basic
+    - k8s-basic
+```
+
+task는 OS나 환경에 따라 실행되거나 되지 않도록 설정할 수 있습니다.
+
+```yaml
+- name: "[post] install dev-tools 폴더 삭제"
+  file:   
+    path: "{{ INSTALL_DOWN_ROOT }}"
+    state: absent
+  tags: post
+  when: ansible_os_family == 'Debian'  # debian일때만 실행
+```
+
+설치 완료 후 로컬 -> VM의 클러스터로 접근하기 위해 다음과 같이 kubeconfig 설정을 해 줍니다. 설정시 로컬의 home디렉토리 경로에 맞게 지정되어야 합니다.
+
+```
+export KUBECONFIG=/home/ska/.kube/k8s/kubeconfig
 ```
 

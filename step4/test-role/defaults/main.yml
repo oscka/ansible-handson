@@ -1,7 +1,5 @@
 ---
 # defaults file for test-role
-
-
 HOSTS: "vms"
 HOST_IP: "{{ansible_host}}"
 
