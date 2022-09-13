@@ -28,15 +28,6 @@
     - install-down
     - pre
 
-- name: helm3 설치
-  shell: |
-    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-  args:
-    chdir: "{{ INSTALL_DOWN_ROOT }}/down/"
-  tags: 
-    - helm3 
-    - pre
-
 - name: "pip 설치"
   apt: 
     name: python3-pip   
@@ -55,6 +46,15 @@
       - docker-compose
   tags: 
     - ansible-module
+
+- name: helm3 설치
+  shell: |
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  args:
+    chdir: "{{ INSTALL_DOWN_ROOT }}/down/"
+  tags: 
+    - helm3 
+    - pre    
 
 - name: bitnami  repository 추가 
   kubernetes.core.helm_repository:
