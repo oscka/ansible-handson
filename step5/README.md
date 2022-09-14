@@ -6,11 +6,10 @@ Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝�
 
 이 ansible 설치 프로젝트는 다음과 같은 구성요소들을 설치합니다.
 
-기본 도구, helm
-
-ingress-nginx, argocd, loki-stack(grafana), pinpoint, mysql, 
-
-demo-api,demo-fe
+- 기본 도구성 유틸, helm3
+- k3s 클러스터, ingress-nginx
+- ingress-nginx, argocd, loki-stack(grafana), pinpoint, mysql
+- demo-api,demo-fe
 
 ## 실행
 
@@ -38,7 +37,7 @@ LOCAL_USER_HOME: "/home/ska"
 
 ### 서비스 확인 및 테스트
 
-다음과 같은 주소에서 각 서비스에 접속하여 확인할 수 있으며 접속하여 그 결과를 확인합니다.
+설치 완료 후 다음과 같은 주소에서 각 서비스에 접속하여 확인할 수 있으며 접속하여 그 결과를 확인합니다.
 
 **접속주소**
 
@@ -77,17 +76,23 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 
 **direnv를 이용하는 방법**
 
-direnv를 이용하여 위 shell 설정을 .envrc에 넣어 하위 디렉토리에 적용되도록 한다.
+direnv를 이용하여 위 shell 설정을 .envrc에 넣어 하위 디렉토리에 적용되도록 합니다.
 
 **ansible의 전역 설정에 추가하는 방법**
 
-ansible 전역 설정 파일을 열어 아래 내용을 추가한다.
+ansible 전역 설정 파일을 열어 아래 내용을 추가합니다.
+
+```
+# /etc/ansible/ansible.cfg 하단에 추가
+[defaults]
+host_key_checking = False
+```
 
 ### External Vars(외부 변수) 활용하는 방법
 
-기본적으로 ansible playbook 실행시 default 하위의 변수들을 참조하도록 되어 있으나 동일한 값을 External Var에 두고 해당 값을 참조하도록 할 수 있다
+기본적으로 ansible playbook 실행시 default 하위의 변수들을 참조하도록 되어 있으나 동일한 값을 External Var에 두고 해당 값을 참조하도록 할 수 있습니다
 
-실행환경 별로 별도로 두어 실행시에 참조를 바꿀 수 있다.
+이를 활용하여 실행환경 별로 별도로 분리하여 실행시에 참조를 환경에 맞게 바꿀 수 있습니다.
 
 ```
 # os별로 혹은 환경별로 external-vars 를 만들어 실행할 수 있음
@@ -96,9 +101,69 @@ ansible-playbook -i hosts-vm  playbook-run-all.yml -t "$TAGS" -e "@external-vars
 
 ### promtail 설정방법
 
-promtail-config -> 변경 후 argocd 네임스페이스도 보이는 지 확인(external-vars 변경 확인 후)
-promtail을 secret으로 만들어 특정 공간에 떨군 후 해당 파일을 적용하는 형태로 사용하였음
+promtail은 loki, grafana와 함께 로그를 통합 모니터링 할수 있게 해주는 도구입니다.
+
+이 스크립트에서는 다음과 같이 promtail 설정을 secret으로 만들어 특정 공간에 떨군 후 해당 파일을 적용하는 형태로 사용하였습니다.(promtail-secret-data.j2)
+
+```yaml
+- name: promtail SECRET 생성 
+  kubernetes.core.k8s:
+    state: present
+    definition: 
+      apiVersion: v1
+      kind: Secret
+      type: Opaque           
+      metadata:
+        name: "{{ PROMTAIL_SECRET_NAME }}"
+        namespace: "{{ PROMTAIL_NAMESPACE | lower }}"   
+      data:
+        promtail.yaml: "{{ lookup('template', PROMTAIL_TEMPLATES_PATH + '/promtail-secret-data.j2' ) | b64encode }}"
+  register: output
+  tags: 
+    - promtail-config
+    - promtail
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+```
+
+
+promtail-config를 변경할 경우 다음과 같이 작업합니다.
+
+```
+# external-vars.yml 파일에 다음 내용을 추가(기존에는 api|fe만 존재)
+PROMTAIL_MATCH_SELECTOR: '{namespace !~ "api|fe|argocd"}'  ## api, fe namespace 외는 모두 drop 한다
+
+# 위 내용을 다시 ansible을 통해 해당 tag만 실행
+./run-play.sh  "promtail-config"
+
+```
+
 
 ### argocd에서 yaml로 배포
 
-argocd 상에서 어플리케이션 자체도 yaml형태로 설치할 수 있음 -> kubectl 명령어로 application을 배포 가능
+일반적으로 argocd 상에서는 GUI를 통해 repository를 등록하고 app을 생성하는 작업을 수행하는데, 이를 argocd 상에서 yaml형태로 두고 kubectl 명령어로 application을 배포하도록 구성할 수 있습니다. 해당 스크립트에서는 이를 jinja2 템플릿으로 두고 yaml을 설정한 뒤 배포하도록 구성하였습니다.
+
+```yaml
+# demo-api-argocd-apps.yml.j2
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-api
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io 
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{DEMO_API_NAMESPACE}}
+  project: default
+  source:
+    repoURL: 'https://github.com/io203/demo-ops.git'
+    path: demo-api/{{DEMO_API_ARGOCD_DEPLOY_TYPE}}
+    targetRevision: {{DEMO_API_ARGOCD_TARGET_REVISION}}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
