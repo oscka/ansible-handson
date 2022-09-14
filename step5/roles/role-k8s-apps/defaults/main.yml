@@ -2,8 +2,8 @@
 ########## hosts info #################
 # HOSTS: "local-vm"
 HOST_IP: "{{ansible_host}}"
-
-LOCAL_USER_HOME: "/Users/blackstar"
+#LOCAL_USER_HOME: "/Users/blackstar"
+LOCAL_USER_HOME: "/home/ska"
 
 
 ########## 공통 #################

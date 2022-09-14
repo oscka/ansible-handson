@@ -1,0 +1,3 @@
+[vms]
+step1 ansible_host=192.168.56.10 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/oscka/ansible-handson/test-vm1/.vagrant/machines/default/virtualbox/private_key
+#step2 ansible_host=192.168.56.20 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/oscka/ansible-handson/test-vm2/.vagrant/machines/default/virtualbox/private_key

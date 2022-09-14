@@ -214,7 +214,7 @@ export KUBECONFIG=/home/ska/.kube/k8s/kubeconfig
 
 이를 좀 더 편하게 하기 위해 direnv를 설치하여 ROOT경로에 해당 파일을 가져다 놓았습니다. 다음을 참고하여 사용하는 shell에 export 설정을 하고 이를 적용합니다. 
 
-```
+```bash
 # direnv 설치
 ## Ubuntu, Debian
 $ apt-get install direnv
@@ -233,7 +233,7 @@ export KUBECONFIG=/home/ska/.kube/k8s/kubeconfig
 
 그밖의 클러스터 설치 관련 사항들은 다음과 같습니다.
 
-```
+```yaml
 # k3d-config.yml.j2
 hostPort: "{{K3D_HOST_PORT}}"  # 설정하지 않으면 바뀜(고정시켜야..)
 (...)
@@ -304,10 +304,14 @@ become: true      # root권한으로 실행 가능
 
   when: INGRESS_NGINX_ENABLE_SSLPASSTHROUGH == 'Y'  # 복호화를 하지 않고 https 요청 자체를 넘김    
 
-
-
-
-
 ```
+
+### Step5
+
+Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝트를 배포하며 이를 모니터링(loki, grafana, pinpoint)하는 부분까지를 설치하고 테스트 할 수 있습니다.
+
+Step5는 내용이 많아 별도의 문서로 기술합니다. [Step5](./step5/README.md)
+
+
 
 
