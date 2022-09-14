@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-fe-ingress
+  namespace: {{DEMO_FE_NAMESPACE}}
+  annotations:
+    kubernetes.io/ingress.class: {{DEMO_FE_INGRESS_CLASS}}
+spec:
+  rules:
+  - host: "{{DEMO_FE_INGRESS_HOST}}"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service: 
+            name: demo-fe-svc
+            port: 
+              number: 8080

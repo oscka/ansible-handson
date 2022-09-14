@@ -1,0 +1,36 @@
+---
+- name: "[pre] apt update"
+  apt:
+    update_cache: yes
+  become: true
+  tags: 
+  - pre
+  - tool-basic
+
+- name: "[pre] zip 설치"
+  apt: 
+    name: zip    
+  become: true  
+  tags: 
+  - pre
+  - tool-basic
+
+- name: "[pre] unzip 설치"
+  apt: 
+    name: unzip
+  become: true
+  tags: 
+  - pre
+  - tool-basic
+    
+- name: "[pre] down 디렉토리 생성"
+  file:
+    path: "{{ INSTALL_DOWN_ROOT }}/down"
+    state: directory
+  tags: 
+  - down-dir
+  - pre
+  - tool-basic
+
+
+

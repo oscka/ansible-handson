@@ -1,0 +1,134 @@
+---
+- name: "[필수사항 체크] Ingress Controller 설치 여부 체크"
+  shell: | 
+    kubectl get pod -n {{GLB_INGRESS_NAMESPACE}} | grep {{DEMO_FE_INGRESS_CLASS}} |wc -l
+  register: output
+  failed_when:  "output.stdout|float < 1"
+  tags:
+    - demo-fe
+    - demo-project
+    - demo-ex
+    - demo-fe-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+- name: "Create a {{DEMO_FE_NAMESPACE}} namespace"
+  kubernetes.core.k8s:
+    name: "{{DEMO_FE_NAMESPACE}}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  tags: 
+    - demo-fe
+    - demo-project
+    - demo-ex
+    - demo-fe-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+#### demo-fe-configmap 배포
+- name: demo-fe-configmap 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "demo/demo-fe/demo-fe-configmap.yml.j2"
+  tags: 
+    - demo-fe-configmap
+    - demo-fe
+    - demo-project
+    - demo-ex
+    - demo-fe-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+
+- name: demo-fe 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "demo/demo-fe/demo-fe-deploy.yml.j2"
+  register: output
+  tags: 
+    - demo-fe
+    - demo-project
+    - demo-ex
+
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - demo-fe
+    - demo-project
+    - demo-ex
+
+#--[waiting]--
+- name: waiting for pod status Ready
+  shell: kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n "{{DEMO_FE_NAMESPACE}}"
+  tags:
+    - demo-fe
+    - demo-project
+    - demo-ex
+
+
+- name: demo-fe-argocd-application 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "demo/demo-fe/demo-fe-argocd-apps.yml.j2"
+  register: output
+  tags: 
+    - demo-fe-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - demo-fe-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+#--[waiting]--
+- name: waiting for pod status Ready
+  shell: |
+    ## argocd가 application 적용후 일정시간 배포 시간이 필요하다 
+    sleep 20 
+
+    kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n "{{DEMO_FE_NAMESPACE}}"
+  tags:   
+    - demo-fe-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+
+
+#### demo-fe ingress 배포
+- name: demo-fe ingress 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "demo/demo-fe/demo-fe-ingress.yml.j2"
+  register: output
+  tags: 
+    - demo-fe-ing
+    - demo-fe
+    - demo-project
+    - demo-ex
+    - demo-fe-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - demo-fe-ing
+    - demo-fe
+    - demo-project
+    - demo-ex
+    - demo-fe-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+
+    

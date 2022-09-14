@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-fe
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io 
+
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{DEMO_FE_NAMESPACE}}
+  project: default
+  source:
+    repoURL: 'https://github.com/io203/demo-ops.git'
+    path: demo-fe/{{DEMO_FE_ARGOCD_DEPLOY_TYPE}}
+    targetRevision: {{DEMO_FE_ARGOCD_TARGET_REVISION}}
+    
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

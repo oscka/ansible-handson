@@ -1,0 +1,44 @@
+---
+############## k3s ##################### 
+
+- name: "[ubuntu] k3s master 설치 k8s_k3s_ver={{K3S_VERSION}}"
+  shell: |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{K3S_VERSION}} sh -s - --write-kubeconfig-mode 644 {{K3S_OPTIONS}}
+    sleep 10
+    mkdir -p ~/.kube
+    cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+  register: output
+  tags: 
+    - k3s 
+  when: ansible_distribution == 'Ubuntu'
+
+- debug:
+    var: output
+  tags: 
+    - k3s
+
+- name: waiting for pod status Ready
+  shell: |
+    sleep 10
+    kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n kube-system
+  tags: 
+    - k3s
+
+- name: "k3s fetch remote kubeconfig"
+  ansible.builtin.fetch:
+    src: "/etc/rancher/k3s/k3s.yaml"
+    dest: "{{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig"
+    flat: yes
+  tags: 
+    - k3s-config-fetch
+    - k3s
+  when: ansible_distribution == 'Ubuntu'
+
+
+- name: "kubeconfig remote.ip replace"
+  local_action: shell
+    sed -i '' 's/0.0.0.0/{{ansible_host}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig
+  tags: 
+    - k3s-config-sed
+    - k3s
+  when: ansible_distribution == 'Ubuntu'

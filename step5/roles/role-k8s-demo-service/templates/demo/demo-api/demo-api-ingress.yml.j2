@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-api-ingress
+  namespace: {{DEMO_API_NAMESPACE}}
+  annotations:
+    kubernetes.io/ingress.class: {{DEMO_API_INGRESS_CLASS}}
+spec:
+  rules:
+  - host: "{{DEMO_API_INGRESS_HOST}}"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service: 
+            name: demo-api-svc
+            port: 
+              number: 8080

@@ -1,0 +1,12 @@
+dependencies:
+- name: mysql
+  repository: https://charts.helm.sh/stable
+  version: 1.6.7
+- name: hdfs
+  repository: https://gradiant.github.io/bigdata-charts/
+  version: 0.1.10
+- name: zookeeper
+  repository: https://charts.helm.sh/incubator
+  version: 2.1.6
+digest: sha256:ab8c0dd8cf7b23bd8bb023cb8d2206e4674d8873bef0ba17e13ef3da170f8935
+generated: "2022-07-30T22:13:14.859761+09:00"

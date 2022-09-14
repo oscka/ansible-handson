@@ -1,0 +1,44 @@
+---
+# - name: "[post] Check if the directory exists"
+#   stat:
+#     path: "{{ zsh.ZSH_CUSTOM_HOME }}"
+#   register: dir_to_check
+#   tags: post
+
+# - name: "[post] my-alias configured"
+#   template:
+#     src: my-alias.zsh.j2
+#     dest: "{{ zsh.ZSH_CUSTOM_HOME }}/my-alias.zsh"
+#   tags: post
+#   when: dir_to_check.stat.isdir is defined and dir_to_check.stat.isdir
+
+## oh-my-zsh 일때 
+
+- name: " [post] zsh 쉘일때  file을 체크한다" 
+  stat:
+    path: "{{ zsh.ZSH_CUSTOM_HOME }}/my-alias.zsh"
+  tags: post
+  when: ansible_facts['user_shell'] == "/bin/zsh"
+
+
+- name: "[post] my-alias configured"
+  template:
+    src: my-alias.zsh.j2
+    dest: "{{ zsh.ZSH_CUSTOM_HOME }}/my-alias.zsh"
+  tags: post
+  when: ansible_facts['user_shell'] == "/bin/zsh" and  st.stat.exists == false
+
+  
+## bash shell 일때 
+- name: "[post] bash-alias configured"
+  script: scripts/bash-alias-script.sh 
+  tags: post
+  when: ansible_facts['user_shell'] == "/bin/bash"
+
+
+- name: "[post] install dev-tools 폴더 삭제"
+  file:   
+    path: "{{ INSTALL_DOWN_ROOT }}"
+    state: absent
+  tags: post
+  when: ansible_os_family == 'Debian'

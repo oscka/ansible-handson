@@ -1,0 +1,181 @@
+---
+
+################ postgresql (docker로 설치) ###############3
+## postgresql을 먼저 설치 해야 한다 
+## tag :  d-postgresql
+## postgresql에 생성 항목들
+## - database: kong
+## - user: kong (`create role` 권한부여)
+## - password: kong1234
+## - database: konga_db
+## - user: konga (`create role` 권한부여)
+## - password: konga1234
+
+################## kong ###########################
+# - name: kong values 업로드
+#   copy:
+#     src: kong/values.yaml
+#     dest:  "{{ component.INSTALL_ROOT }}/kong/"  
+#   tags: 
+#     - kong-up
+#     - kong
+#     - kong-stack
+#   when: ansible_distribution == 'Ubuntu'
+
+# - name: kong  설치
+#   kubernetes.core.helm:
+#     name: kong
+#     chart_ref: bitnami/kong
+#     release_namespace: kong 
+#     create_namespace: true
+#     values_files:
+#       - "{{ component.INSTALL_ROOT }}/kong/values.yaml"
+#     wait: true
+#   register: output
+#   tags: 
+#     - kong
+#     - kong-stack
+
+- name: "kong 설치" 
+  shell: |
+    helm upgrade -i kong --create-namespace --namespace kong bitnami/kong --version {{KONG_CHART_VERSION}} \
+      --set postgresql.enabled=false \
+      --set postgresql.external.host={{KONG_POSTGRESQL_EXTERNAL_HOST}} \
+      --set postgresql.external.database=kong \
+      --set postgresql.external.user={{KONG_POSTGRESQL_EXTERNAL_USER}} \
+      --set postgresql.external.password={{KONG_POSTGRESQL_EXTERNAL_PASSWORD}} \
+      --set service.exposeAdmin={{KONG_SERVICES_EXPOSEADMIN}} --wait
+  register: output
+  tags: 
+    - kong
+    - kong-stack
+
+
+# - name: "kong 설치 "
+#   kubernetes.core.helm:
+#     name: kong
+#     chart_ref: bitnami/kong
+#     # chart_version: "{{KONG_CHART_VERSION}}"
+#     release_namespace: kong ## namespace는 kong만 허용한다(chart에서 제한함)
+#     create_namespace: true
+#     update_repo_cache: true
+#     values:
+#       postgresql:
+#         enabled: false
+#         external:
+#           host: 172.26.3.63
+#           port: 5432
+#           database: kong
+#           user: kong
+#           password: kong1234
+#       services: 
+#         exposeAdmin: true
+#     wait: true
+#   register: output
+#   tags: 
+#     - kong-en
+#     - kong-stack
+
+# - name: "kong 설치 "
+#   kubernetes.core.helm:
+#     name: kong
+#     chart_ref: bitnami/kong
+#     chart_version: 6.3.27
+#     release_namespace: kong ## namespace는 kong만 허용한다(chart에서 제한함)
+#     create_namespace: true
+#     # values: "{{ lookup('template', 'kong/values.yaml')| from_yaml}}"
+#     values_files:
+#       - /home/ubuntu/values.yaml
+#   tags: 
+#     - kong-en
+#     - kong-stack
+
+#--out---
+- debug:
+    var: output
+  tags: 
+    - kong
+    - kong-stack
+
+############## konga ##################
+## konga는 repo에 등록되어 있지 않는다 따라서 로컬에서 올린다 
+
+- name: "[필수사항 체크] Ingress Controller 설치 여부 체크"
+  ansible.builtin.shell: | 
+    kubectl get pod -n {{GLB_INGRESS_NAMESPACE}} | grep {{KONGA_INGRESS_CLASS}} |wc -l
+  register: output
+  failed_when:  "output.stdout|float < 1"
+  tags:
+    - konga-ing
+    - konga
+    - kong-stack
+
+    
+## konga helm repo에 등록 되어 있지 않다 
+## 따라서 로컬에서 업로드 하여 사용한다 
+- name: konga 업로드
+  copy:
+    src: konga/konga-chart.tgz
+    dest:  "{{ component.INSTALL_ROOT }}/konga/"  
+  tags: 
+    - konga-up
+    - konga
+    - kong-stack
+  when: ansible_distribution == 'Ubuntu'
+
+- name: konga chart to  Extract chart
+  ansible.builtin.unarchive:
+    src: "{{ component.INSTALL_ROOT }}/konga/konga-chart.tgz"
+    dest: "{{ component.INSTALL_ROOT }}/konga/"
+    remote_src: yes
+  tags: 
+    - konga-unarc
+    - konga
+    - kong-stack
+  when: ansible_distribution == 'Ubuntu'
+
+- name: konga  설치
+  kubernetes.core.helm:
+    name: konga 
+    chart_ref: "{{ component.INSTALL_ROOT }}/konga/konga-chart/"
+    release_namespace: kong 
+    values:
+      config:
+        db_adapter: "{{KONGA_DB_ADAPTER}}"
+        db_host: "{{KONGA_DB_HOST}}"
+        db_port: "{{KONGA_DB_PORT}}"
+        db_user: "{{KONGA_DB_USER}}"
+        db_password: "{{KONGA_DB_PASSWORD}}"
+        db_database: "{{KONGA_DB_DATABASE}}"
+    wait: true
+  register: output
+  tags: 
+    - konga
+    - kong-stack
+
+
+- debug:
+    var: output
+  tags: 
+    - konga
+    - kong-stack
+
+
+- name: konga ingress 설치 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "konga/konga-ingress.yml.j2"
+  register: output
+  tags: 
+    - konga-ing
+    - konga
+    - kong-stack
+
+
+- debug:
+    var: output
+  tags: 
+    - konga-ing
+    - konga
+    - kong-stack

@@ -1,0 +1,79 @@
+---
+# ########## glb_ingress_namespace #################
+# GLB_INGRESS_NAMESPACE: "ingress-nginx"
+
+
+########## k3s #################
+# K3S_VERSION: "v1.23.7+k3s1" ## v1.23.7+k3s1  https://github.com/k3s-io/k3s/releases
+# K3S_OPTIONS: "--bind-address 0.0.0.0 --tls-san {{HOST_IP}} --disable traefik"
+
+# ########## apm 설정  #################
+APM_YN: "Y"  
+APM_TYPE: "pinpoint" ## type: elastic, pinpoint
+
+
+
+# ## pinpoint apm 적용시
+# ## agent to pinpoint-collector  access port : 9991-9996 open 해야 한다 
+# PINPOINT_APM_VERSION: "2.4.0"
+# PINPOINT_APM_PROFILE: "release" ## pinpoint는 local/release profile만 존재한다
+# PINPOINT_APM_COLLECTOR_IP: "pinpoint-pinpoint-collector.pinpoint-system.svc"
+
+# ##########demo-project##############
+# DEMO_OPS_REPO_URL: "https://github.com/io203/demo-ops.git"
+# DEMO_OPS_GIT_USER: "io203"
+# DEMO_OPS_GIT_SECRET: "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"
+
+# ######### demo-api #################
+# DEMO_API_NAMESPACE: "api"
+# DEMO_API_REPLICAS: 2
+# DEMO_API_INGRESS_CLASS: "nginx"
+# DEMO_API_INGRESS_HOST: "demo-api.{{HOST_IP}}.sslip.io"
+# DEMO_API_SERVICE_TYPE: "ClusterIP"
+# DEMO_API_NODE_PORT: 30001
+
+DEMO_API_DB_URL: "mysql-svc.db.svc:3306" ## k8s: mysql-svc.db.svc:3306 , k3d-docker: host.k3d.internal:3306, k3s-docker: host.k3s.internal:3306
+# DEMO_API_DB_DATABASE: "blackstar"
+# DEMO_API_DB_USERNAME: "blackstar"
+# DEMO_API_DB_PASSWORD: "1234"
+
+
+# ## demo-api (apm 적용 없을 경우)
+# DEMO_API_IMAGE: "saturn203/demo-api:stable-1.0"
+# ## demo-api apm 적용시
+# DEMO_API_IMAGE_ELASTIC_APM: "saturn203/demo-api:elastic-apm-v1.0"
+# ## pinpoint apm 적용시
+# DEMO_API_IMAGE_PINPOINT_APM: "saturn203/demo-api:pinpoint-apm-v1.0"
+
+
+# DEMO_API_ARGOCD_DEPLOY_TYPE: "rolling" ## default: rolling  deploy_type: rolling, bluegreen, canary
+DEMO_API_ARGOCD_TARGET_REVISION: "pinpoint" ## default: main ,  revision: main, pinpoint
+
+# # demo-api-loadtest(locust)
+# DEMO_API_LOADTEST_FILE: "/Users/blackstar/dev/workspace/vscode/tools-work/locust/k8s/demo-api.py"
+
+
+
+
+
+# ########## demo-fe #################
+# DEMO_FE_NAMESPACE: "fe"
+# DEMO_FE_REPLICAS: 2
+# DEMO_FE_INGRESS_CLASS: "nginx"
+# DEMO_FE_INGRESS_HOST: "demo-fe.{{HOST_IP}}.sslip.io"
+# DEMO_FE_SERVICE_TYPE: "ClusterIP"
+# DEMO_FE_NODE_PORT: 30001
+
+# DEMO_FE_DEMO_API_URL: "demo-api-svc.api.svc:8080" ## api url 
+
+# ## demo-fe (apm 적용 없을 경우)
+# DEMO_FE_IMAGE: "saturn203/demo-fe:stable-1.0"
+# ## es-apm 적용시
+# DEMO_FE_IMAGE_ELASTIC_APM: "saturn203/demo-fe:elastic-apm-v1.0"
+# ## pinpoint apm 적용시
+# DEMO_FE_IMAGE_PINPOINT_APM: "saturn203/demo-fe:pinpoint-apm-v1.0"
+
+# DEMO_FE_ARGOCD_DEPLOY_TYPE: "rolling" ## default: rolling  deploy_type: rolling, bluegreen, canary
+DEMO_FE_ARGOCD_TARGET_REVISION: "pinpoint" ## default: main ,  revision: main, pinpoint
+
+

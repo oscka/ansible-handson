@@ -1,0 +1,17 @@
+import random
+from locust import HttpUser, task, between, TaskSet
+
+
+class MainBehavior(TaskSet):
+    @task
+    def main_task(self):
+        print("main task")
+        # emp_id = ["1","2","3","4","5"]
+        # self.client.get("/employees/"+ random.choice(emp_id)
+        board_num = ["10","15","13","12"]
+        self.client.get("/api/boards/"+random.choice(board_num))
+
+class LocustUser(HttpUser):
+    host = "http://demo-api-svc.api.svc:8080"
+    tasks = [MainBehavior]
+    wait_time = between(1, 4)

@@ -1,0 +1,129 @@
+---
+########## hosts info #################
+# HOSTS: "local-vm"
+HOST_IP: "{{ansible_host}}"
+
+LOCAL_USER_HOME: "/Users/blackstar"
+
+
+########## 공통 #################
+## helm repo update
+HELM_UPDATE_REPO_CACHE: false
+
+
+
+########## k3s #################
+K3S_VERSION: "v1.23.7+k3s1" ## v1.23.7+k3s1  https://github.com/k3s-io/k3s/releases
+K3S_OPTIONS: "--bind-address 0.0.0.0 --tls-san {{HOST_IP}} --disable traefik"
+
+########## k3d #################
+#K3D_TRAEFIK_INSTALL_YN: "N"  ## traefik ingress Controller 설치여부(default=N)
+K3D_ClUSTER_NAME: "my-cluster" 
+K3D_HOST_IP: "0.0.0.0"
+K3D_HOST_PORT: 6443
+K3D_AGENT: 2
+# nodeport range :  30000~32767
+K3D_EXTRA_PORT1: 9000 
+K3D_EXTRA_PORT2: 9700  
+K3D_EXTRA_PORT3: 32180  
+K3D_EXTRA_PORT4: 32181 
+K3D_OPTIONS_ARG1: "--disable=traefik"
+
+# k3d command로 설치시 
+K3D_OPTIONS1: " --k3s-arg '--disable=traefik@server:0'"
+
+
+########## glb_ingress_namespace #################
+GLB_INGRESS_NAMESPACE: "ingress-nginx"
+
+########## ingress-nginx #################
+INGRESS_NGINX_NAMESPACE: ingress-nginx
+INGRESS_NGINX_CHART: "ingress-nginx/ingress-nginx"
+INGRESS_NGINX_CHART_VERSION: "4.2.0" 
+INGRESS_NGINX_ENABLE_SSLPASSTHROUGH: "Y"
+
+########## cert_manager #################
+CERT_MANAGER_VERSION: "v1.8.2"
+CERT_MANAGER_NAMESAPCE : "cert-manager"
+
+
+########## argocd #################
+ARGOCD_INGRESS_CLASS: "nginx"  ## ingress (default=nginx)
+ARGOCD_HOST: "argocd.{{HOST_IP}}.sslip.io"  ## argocd server host (default=argocd.127.0.0.1.sslip.io)
+ARGOCD_NEW_PASSWORD: "admin1234" ## argocd admin password(default=admin1234)
+ARGO_ROLLOUTS_YN: "N"    ## argo rollouts 설치 여부(default=N)
+ARGOCD_IMAGE_UPDATEER_YN: "N"  ## argocd image-updater 설치 여부(default=N)
+ARGOCD_INGRESS_YN: "Y"
+
+
+############  loki stack ##################
+LOKI_CHART_VERSION: "2.13.2"  ## loki: v2.6.1
+LOKI_NAMESPACE: "mon"
+
+
+############ promtail ##############
+PROMTAIL_CHART_VERSION: "6.2.2"  ## promtail: 2.6.1
+PROMTAIL_NAMESPACE: "mon"
+PROMTAIL_CLITENTS_URL: "http://loki:3100/loki/api/v1/push"
+# promtail filter 적용시
+PROMTAIL_FILTER: true ## filter를 사용여부 
+PROMTAIL_MATCH_SELECTOR: '{namespace !~ "api|fe"}'  ## api, fe namespace 외는 모두 drop 한다
+
+PROMTAIL_SECRET_NAME: "promtail"
+PROMTAIL_TEMPLATES_PATH: "promtail"
+
+
+
+
+############ grafana ##############
+GRAFANA_CHART_VERSION: "6.30.2" ## grafana: 8.5.3 (logbrowser가 있음 마지막 버전)
+GRAFANA_NAMESPACE: "mon"
+GRAFANA_ADMIN_PASSWORD: "admin1234"
+GRAFANA_INGRESS_CLASS: "nginx"
+GRAFANA_HOSTNAME: "grafana.{{HOST_IP}}.sslip.io"
+
+
+
+########## pinpoint #################
+PINPOINT_NAMESPACE: pinpoint-system
+PINPOINT_VERSION: 2.4.0
+PINPOINT_INGRESS_CLASS: "nginx"
+PINPOINT_HOSTNAME: "pinpoint.{{HOST_IP}}.sslip.io"
+
+
+
+############ kong ##############
+KONG_CHART_VERSION: "6.3.27" 
+KONG_POSTGRESQL_EXTERNAL_HOST: "172.26.3.63"
+KONG_POSTGRESQL_EXTERNAL_PORT: 5432
+KONG_POSTGRESQL_EXTERNAL_USER: "kong"
+KONG_POSTGRESQL_EXTERNAL_PASSWORD: "kong1234"
+KONG_SERVICES_EXPOSEADMIN: true
+
+
+############ konga ##############
+KONGA_NAMESPACE: "kong"
+KONGA_DB_ADAPTER: "postgres"
+KONGA_DB_HOST: "172.26.3.63"
+KONGA_DB_PORT: 5432
+KONGA_DB_USER: "konga"
+KONGA_DB_PASSWORD: "konga1234"
+KONGA_DB_DATABASE: "konga_db"
+KONGA_INGRESS_CLASS: "nginx"
+KONGA_HOSTNAME: "konga.{{HOST_IP}}.sslip.io"
+
+
+
+
+########## mysql #################
+MYSQL_NAMESPACE: "db"
+
+MYSQL_PV_STORAGE: "4Gi"
+MYSQL_IMAGE: "mysql:5.7.30"
+
+MYSQL_INGRESS_CLASS: "nginx"
+MYSQL_INGRESS_HOST: "mysql.{{HOST_IP}}.sslip.io"
+MYSQL_ROOT_PASSWORD: "root"
+MYSQL_USER_NAME: "blackstar"
+MYSQL_USER_PASSWORD: "1234"
+

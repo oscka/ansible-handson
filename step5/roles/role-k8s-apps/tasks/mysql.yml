@@ -1,0 +1,161 @@
+---
+- name: "[필수사항 체크] mysql설치시 Ingress Controller 설치 여부 체크"
+  ansible.builtin.shell: | 
+    kubectl get pod -n {{GLB_INGRESS_NAMESPACE}} | grep {{MYSQL_INGRESS_CLASS}} |wc -l
+  register: output
+  failed_when:  "output.stdout|float < 1"
+  tags:
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+
+- name: "ingress-nginx  controller upgrade : tcp 3306 mysql 설정"
+  kubernetes.core.helm:
+    name: ingress-nginx
+    chart_ref: "ingress-nginx/ingress-nginx"
+    chart_version: "{{INGRESS_NGINX_CHART_VERSION}}"
+    release_namespace: "{{INGRESS_NGINX_NAMESPACE}}"
+    create_namespace: true   
+    wait: true
+    values:
+      tcp:
+        3306: "{{MYSQL_NAMESPACE}}/mysql-svc:3306"
+      controller: 
+        extraArgs:
+          enable-ssl-passthrough: true
+        
+  register: output
+  tags: 
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+  when: INGRESS_NGINX_ENABLE_SSLPASSTHROUGH == 'Y'
+
+- name: "ingress-nginx  controller upgrade : tcp 3306 mysql 설정"
+  kubernetes.core.helm:
+    name: ingress-nginx
+    chart_ref: "ingress-nginx/ingress-nginx"
+    chart_version: "{{INGRESS_NGINX_CHART_VERSION}}"
+    release_namespace: "{{INGRESS_NGINX_NAMESPACE}}"
+    create_namespace: true   
+    wait: true
+    values:
+      tcp:
+        3306: "{{MYSQL_NAMESPACE}}/mysql-svc:3306"
+  register: output
+  tags: 
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+  when: INGRESS_NGINX_ENABLE_SSLPASSTHROUGH == 'N'
+    
+  
+
+- name: Create  namespace
+  kubernetes.core.k8s:
+    name: "{{MYSQL_NAMESPACE}}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  tags: 
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+
+- name: mysql secret 생성 
+  shell: |
+    kubectl -n {{MYSQL_NAMESPACE}}  create secret generic mysql \
+      --from-literal=root.password="{{MYSQL_ROOT_PASSWORD}}" \
+      --from-literal=user.name="{{MYSQL_USER_NAME}}" \
+      --from-literal=user.password="{{MYSQL_USER_PASSWORD}}"
+  tags: 
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+
+- name: mysql 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "mysql/mysql-deploy.yml.j2"
+  register: output
+  tags: 
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+
+#--[waiting]--
+- name: waiting for pod status Ready
+  shell: kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n "{{MYSQL_NAMESPACE}}"
+  tags:
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+
+
+- name:  sample board data 업로드
+  copy:
+    src: db/mysql/board.sql
+    dest:  "{{ component.INSTALL_ROOT }}/db/"  
+  tags: 
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+
+  when: ansible_distribution == 'Ubuntu'
+
+- name:  mysql import data
+  shell: |
+    sleep 15
+    kubectl -n {{MYSQL_NAMESPACE}} exec -i $(kubectl get pod -n {{MYSQL_NAMESPACE}} | grep mysql | awk '{ print $1 }') -- mysql -u {{MYSQL_USER_NAME}} -p{{MYSQL_USER_PASSWORD}} --default-character-set=utf8 < {{ component.INSTALL_ROOT }}/db/board.sql
+  
+  register: output
+  tags:
+    - mysql-data-import
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+    
+
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - mysql-data-import
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+
+
+
+
+
+- name: mysql ingress 설치 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "mysql/mysql-ingress.yml.j2"
+  register: output
+  tags: 
+    - mysql-ing
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+  when: MYSQL_INGRESS_CLASS == 'nginx'
+
+- debug:
+    var: output
+  tags: 
+    - mysql-ing
+    - mysql
+    - demo-ex
+    - demo-ex-argocd
+

@@ -1,0 +1,78 @@
+---
+######## elasticsearch +kibana [bitnami] #########
+- name: "[필수사항 체크] Ingress Controller 설치 여부 체크"
+  shell: | 
+    kubectl get pod -n {{GLB_INGRESS_NAMESPACE}} | grep {{PINPOINT_INGRESS_CLASS}} |wc -l
+  register: output
+  failed_when:  "output.stdout|float < 1"
+  tags:
+    - pinpoint-ing
+    - pinpoint
+    - demo-ex
+    - demo-ex-argocd
+
+- name: pinpoint chart 업로드
+  copy:
+    src: "pinpoint/pinpoint-{{PINPOINT_VERSION}}.tgz"
+    dest:  "{{ component.INSTALL_ROOT }}/pinpoint/"  
+  tags: 
+    - pinpoint-up
+    - pinpoint
+    - demo-ex
+    - demo-ex-argocd
+  when: ansible_distribution == 'Ubuntu'
+
+- name: "pinpoint chart Extract  pinpoint-{{PINPOINT_VERSION}}.tgz"
+  ansible.builtin.unarchive:
+    src: "{{ component.INSTALL_ROOT }}/pinpoint/pinpoint-{{PINPOINT_VERSION}}.tgz"
+    dest: "{{ component.INSTALL_ROOT }}/pinpoint/"
+    remote_src: yes
+  tags: 
+    - pinpoint-unarc
+    - pinpoint
+    - demo-ex
+    - demo-ex-argocd
+  when: ansible_distribution == 'Ubuntu'
+
+- name: pinpoint apm 설치
+  kubernetes.core.helm:
+    name: pinpoint 
+    chart_ref: "{{ component.INSTALL_ROOT }}/pinpoint/pinpoint-{{PINPOINT_VERSION}}/"
+    release_namespace: "{{PINPOINT_NAMESPACE}}"     
+    create_namespace: true
+    wait: true
+  register: output
+  tags: 
+    - pinpoint
+    - demo-ex
+    - demo-ex-argocd
+
+
+- debug:
+    var: output
+  tags: 
+    - pinpoint
+    - demo-ex
+    - demo-ex-argocd
+
+
+- name: pinpoint ingress 설치 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "pinpoint/pinpoint-ingress.yml.j2"
+  register: output
+  tags: 
+    - pinpoint-ing
+    - pinpoint
+    - demo-ex
+    - demo-ex-argocd
+
+
+- debug:
+    var: output
+  tags: 
+    - pinpoint-ing
+    - pinpoint
+    - demo-ex
+    - demo-ex-argocd

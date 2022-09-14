@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mysql-ingress
+  namespace: {{MYSQL_NAMESPACE}}
+  annotations:
+    kubernetes.io/ingress.class: {{MYSQL_INGRESS_CLASS}}  
+spec:
+  rules:
+  - host: "{{MYSQL_INGRESS_HOST}}"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service: 
+            name: mysql-svc
+            port: 
+              number: 3306

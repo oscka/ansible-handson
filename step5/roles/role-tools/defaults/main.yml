@@ -1,0 +1,12 @@
+---
+
+# HOSTS: "local-vm"
+
+
+USER_NAME: "{{ ansible_user }}"
+INSTALL_DOWN_ROOT: /home/{{ ansible_user }}/dev-tools
+
+### k3d-github:  https://github.com/k3d-io/k3d/releases
+K3D_TAG_VER: "v5.2.2" ## tag:v5.2.2 (v1.21.7-k3s1), tag: v5.3.0(v1.22.6-k3s1), tag: v5.4.3 (v1.23.6-k3s1)
+K9S_VERSION: v0.25.21 
+

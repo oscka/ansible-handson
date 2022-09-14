@@ -1,0 +1,9 @@
+# - hosts: localhost
+# - hosts: "{{ HOSTS }}"
+- hosts: all
+  vars:
+    - ROLES_PATH: /Users/blackstar/dev/lecture-session/ansible-lecture/study/step5/roles
+  roles:    
+    - role: "{{ROLES_PATH}}/role-tools"
+    - role: "{{ROLES_PATH}}/role-k8s-apps"
+    - role: "{{ROLES_PATH}}/role-k8s-demo-service"

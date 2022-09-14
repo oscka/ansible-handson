@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pinpoint-ingress
+  namespace: {{PINPOINT_NAMESPACE}}
+  annotations:
+    kubernetes.io/ingress.class: {{PINPOINT_INGRESS_CLASS}}    
+spec:
+  rules:
+  - host: {{PINPOINT_HOSTNAME}}
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service: 
+            name: pinpoint-pinpoint-web-ui
+            port: 
+             number: 8080

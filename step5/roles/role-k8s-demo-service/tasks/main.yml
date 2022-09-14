@@ -1,0 +1,17 @@
+---
+# tasks file for role-k8s-demo-apps
+
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_distribution }}.yml"
+  tags: always
+  when: ansible_distribution == 'Ubuntu'
+
+
+
+- name: import  demo-api
+  import_tasks: demo-api.yml
+
+- name: import  demo-fe
+  import_tasks: demo-fe.yml
+
+

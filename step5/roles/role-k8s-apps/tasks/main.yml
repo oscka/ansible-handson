@@ -1,0 +1,52 @@
+---
+# tasks file for k8s-app-role
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_distribution }}.yml"
+  tags: always
+
+
+################ pre work ###########
+
+- name: helm-reposittory add and update
+  import_tasks: helm-repo.yml
+
+- name: import  k3s
+  import_tasks: k3s-cluster.yml
+  
+- name: import  k3d
+  import_tasks: k3d-cluster.yml
+
+- name: import ingress controller
+  import_tasks: ingress-nginx.yml
+  
+- name: import cert-manager
+  import_tasks: cert-manager.yml
+
+
+
+
+- name: import argocd
+  import_tasks: argocd.yml
+
+- name: import loki-stack
+  import_tasks: loki-stack.yml
+
+- name: import pinpoint
+  import_tasks: pinpoint.yml
+
+
+
+
+- name: import DB
+  import_tasks: mysql.yml
+
+
+
+
+- name: import gateway
+  import_tasks: kong-gw.yml
+
+
+  
+
+ 

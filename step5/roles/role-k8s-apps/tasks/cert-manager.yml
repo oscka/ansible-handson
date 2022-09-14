@@ -1,0 +1,19 @@
+---
+######## cert-manager #########
+- name: cert-manager  설치
+  kubernetes.core.helm:
+    name: cert-manager 
+    chart_ref: jetstack/cert-manager
+    chart_version: "{{CERT_MANAGER_VERSION}}"
+    release_namespace: "{{CERT_MANAGER_NAMESAPCE}}"
+    create_namespace: true
+    values:
+      installCRDs: true
+  register: output
+  tags: 
+    - cert-mgr
+
+- debug:
+    var: output
+  tags: 
+    - cert-mgr

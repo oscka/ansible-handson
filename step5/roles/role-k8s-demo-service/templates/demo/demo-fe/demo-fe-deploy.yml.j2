@@ -1,0 +1,76 @@
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: demo-fe-svc
+  namespace: {{DEMO_FE_NAMESPACE}}
+spec:
+  selector:
+    app: demo-fe
+  
+  ports:
+  - protocol: TCP
+    name: http
+    port: 8080    
+    targetPort: http
+{% if DEMO_FE_SERVICE_TYPE == 'NodePort' %}
+    nodePort: {{DEMO_FE_NODE_PORT}}
+  type: NodePort
+{% elif DEMO_FE_SERVICE_TYPE == 'LoadBalancer'  %}
+  type: LoadBalancer
+{% else %}
+  type: ClusterIP
+{% endif %}
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-fe
+  namespace: {{DEMO_FE_NAMESPACE}}     
+  labels:
+    app: demo-fe
+spec:
+  replicas: {{DEMO_FE_REPLICAS}}
+  selector:
+    matchLabels:
+      app: demo-fe
+  template:
+    metadata:      
+      labels:
+        app: demo-fe    
+    spec:
+      containers:
+        - name: demo-fe
+{% if APM_YN == 'Y' and APM_TYPE == 'elastic' %}     
+          image: {{DEMO_FE_IMAGE_ELASTIC_APM}}
+{% elif APM_YN == 'Y' and APM_TYPE == 'pinpoint' %}    
+          image: {{DEMO_FE_IMAGE_PINPOINT_APM}}
+{% else %}
+          image: {{DEMO_FE_IMAGE}}
+{% endif %}
+          ports:
+          - name: http
+            containerPort: 8080
+
+          envFrom:
+            - configMapRef:
+                name: demo-fe-configmap
+
+{% if APM_YN == 'Y' and APM_TYPE == 'pinpoint' %} 
+          env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP          
+          - name: JAVA_TOOL_OPTIONS
+            value: >-
+              -javaagent:/pinpoint-agent-{{PINPOINT_APM_VERSION}}/pinpoint-bootstrap-{{PINPOINT_APM_VERSION}}.jar
+              -Dpinpoint.container
+              -Dpinpoint.applicationName=demo-fe
+              -Dpinpoint.agentId=$(POD_IP)
+              -Dpinpoint.profiler.profiles.active={{PINPOINT_APM_PROFILE}}
+              -Dprofiler.transport.grpc.collector.ip={{PINPOINT_APM_COLLECTOR_IP}}
+{% endif %}

@@ -1,0 +1,13 @@
+---
+# vars file for dev-tools-role
+
+
+zsh:
+  ZSH_CUSTOM_HOME: "/home/{{ ansible_user }}/.oh-my-zsh/custom"
+  
+
+
+
+
+
+

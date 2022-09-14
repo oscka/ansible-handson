@@ -1,0 +1,243 @@
+---
+######## grafana loki-stack###########
+
+- name: "[필수사항 체크] Ingress Controller 설치 여부 체크"
+  shell: | 
+    kubectl get pod -n {{GLB_INGRESS_NAMESPACE}} | grep {{GRAFANA_INGRESS_CLASS}} |wc -l
+  register: output
+  failed_when:  "output.stdout|float < 1"
+  tags:
+    - loki-stack
+    - grafana-ing
+    - grafana
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+ 
+
+  
+
+########### loki ###################
+- name: "loki 설치 (chart ver: {{LOKI_CHART_VERSION}}"
+  kubernetes.core.helm:
+    name: "loki"
+    chart_ref: grafana/loki
+    chart_version: "{{LOKI_CHART_VERSION}}"
+    release_namespace: "{{LOKI_NAMESPACE}}"
+    create_namespace: true
+    update_repo_cache: "{{HELM_UPDATE_REPO_CACHE}}"
+
+  register: output
+  tags: 
+    - loki
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+
+- name: waiting for pod status Ready
+  shell: |
+      kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n "{{LOKI_NAMESPACE}}"
+  tags: 
+    - loki
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+
+- debug:
+    var: output
+  tags: 
+    - loki
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+
+##### [ promtail ] #######
+- name: "grafana promtail 설치 (chart ver: {{PROMTAIL_CHART_VERSION}}"
+  kubernetes.core.helm:
+    name: "promtail"
+    chart_ref: grafana/promtail
+    chart_version: "{{PROMTAIL_CHART_VERSION}}"
+    release_namespace: "{{PROMTAIL_NAMESPACE}}"
+    create_namespace: true
+    # update_repo_cache: "{{HELM_UPDATE_REPO_CACHE}}"
+    values:
+      config:
+        clients:
+          - url: "{{PROMTAIL_CLITENTS_URL}}"
+  register: output
+  tags: 
+    - promtail
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+
+- name: waiting for pod status Ready
+  shell: |
+      kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n {{PROMTAIL_NAMESPACE}}
+  tags: 
+    - promtail
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+
+- debug:
+    var: output
+  tags: 
+    - promtail
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+
+- name: promtail SECRET 생성 
+  kubernetes.core.k8s:
+    state: present
+    definition: 
+      apiVersion: v1
+      kind: Secret
+      type: Opaque             
+      metadata:
+        name: "{{ PROMTAIL_SECRET_NAME }}"
+        namespace: "{{ PROMTAIL_NAMESPACE | lower }}"     
+      data:
+        promtail.yaml: "{{ lookup('template', PROMTAIL_TEMPLATES_PATH + '/promtail-secret-data.j2' ) | b64encode }}"
+  register: output
+  tags: 
+    - promtail-config
+    - promtail
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+
+
+- name: promtail daemonset refresh 
+  shell: |
+    kubectl rollout restart  ds/{{PROMTAIL_SECRET_NAME}} -n {{PROMTAIL_NAMESPACE}}
+    
+    echo
+    echo
+    echo "================ promtail-config decoding ================================"
+    kubectl -n {{PROMTAIL_NAMESPACE}} get secret {{PROMTAIL_SECRET_NAME}} -o jsonpath='{.data.*}' | base64 -d
+  register: output
+  tags: 
+    - promtail-config
+    - promtail
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+- debug:
+    var: output
+  tags: 
+    - promtail-config
+    - promtail
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+
+- name: waiting for daemonset rollout  pod   status Ready
+  shell: |
+      kubectl rollout status ds/{{PROMTAIL_SECRET_NAME}} -n {{PROMTAIL_NAMESPACE}}
+      # kubectl wait ds/{{PROMTAIL_SECRET_NAME}} --timeout=-1s --for condition=available  -n {{PROMTAIL_NAMESPACE}}
+      # sleep 20  ## promtail daemonset reloading 되는 시간동안 waiting
+      # kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n {{PROMTAIL_NAMESPACE}}
+  tags: 
+    - promtail-config
+    - promtail
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+
+##### [ grafana ] #######
+# - name: "grafana  설치 (chart ver: {{GRAFANA_CHART_VERSION}}"
+#   kubernetes.core.helm:
+#     name: "grafana"
+#     chart_ref: grafana/grafana
+#     chart_version: "{{GRAFANA_CHART_VERSION}}"
+#     release_namespace: "{{GRAFANA_NAMESPACE}}"
+#     create_namespace: true
+#     update_repo_cache: "{{HELM_UPDATE_REPO_CACHE}}"
+#     values:
+#       adminPassword: "{{GRAFANA_ADMIN_PASSWORD}}"
+
+#   register: output
+#   tags: 
+#     - grafana
+#   
+# - name: waiting for pod status Ready
+#   shell: |
+#       kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n "{{GRAFANA_NAMESPACE}}"
+#   tags: 
+#     - grafana
+
+# - debug:
+#     var: output
+#   tags: 
+#     - grafana
+
+  
+
+
+##### [ grafana ] #######
+## grafana chart 특정버전 설치 이슈가 있어서 url download chart로 설치 하였다 
+- name: "grafana-with chart ver: {{GRAFANA_CHART_VERSION}} from url"
+  kubernetes.core.helm:
+    name: grafana
+    chart_ref: "https://github.com/grafana/helm-charts/releases/download/grafana-{{GRAFANA_CHART_VERSION}}/grafana-{{GRAFANA_CHART_VERSION}}.tgz"
+    release_namespace: "{{GRAFANA_NAMESPACE}}" 
+    create_namespace: true
+    values:
+      adminPassword: "{{GRAFANA_ADMIN_PASSWORD}}"
+      datasources: 
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+          - name: loki
+            type: loki
+            url: http://loki:3100
+            access: proxy
+            isDefault: true
+    wait: true
+  register: output
+  tags: 
+    - grafana
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+
+- debug:
+    var: output
+  tags: 
+    - grafana
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+  
+- name: "[loki-stack] grafana  ingress 설치 "
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "grafana/loki-stack-grafana-ingress.yml.j2"
+  register: output
+  tags: 
+    - grafana-ing
+    - grafana
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd
+
+- debug:
+    var: output
+  tags: 
+    - grafana-ing
+    - grafana
+    - loki-stack
+    - demo-ex
+    - demo-ex-argocd

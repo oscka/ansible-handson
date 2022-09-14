@@ -1,0 +1,44 @@
+alias cdcustom='cd /Users/blackstar/.oh-my-zsh/custom/'
+
+#=======k8s 관련 ==========
+alias k='kubectl'
+alias kg='kubectl get $1'
+
+alias ktail='kubetail'
+alias sff='skaffold'
+
+alias wall='watch kubectl get all -n $1'
+alias wpod='watch kubectl get pod -n $1'
+alias wpodA='watch kubectl get pod -A'
+
+##kubectx
+alias kctx='kubectx'
+
+##kubens
+alias kns='kubens'
+
+
+alias s-alias='alias |grep $1'
+
+#=========docker=======
+alias dk='docker'
+alias dkc='docker-compose'
+
+# alias dk-rm-app='docker rm -f $(docker ps -a | grep $1 | awk '{print$1}')'
+
+# alias dk-rmi-app='docker rmi -f  $(docker images | grep $1 | awk '{print$3}')'
+
+
+### kafka
+alias kcat='kafkacat'
+
+
+
+
+
+
+
+
+
+
+

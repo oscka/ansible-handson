@@ -1,0 +1,135 @@
+
+######## keycloak #########
+- name: bitnami  repository 추가 
+  kubernetes.core.helm_repository:
+    name: bitnami
+    repo_url: https://charts.bitnami.com/bitnami
+  tags: 
+    - bitnami-repo
+    - helm-repo
+
+    
+
+
+- name: ingress-nginx  repository 추가 
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+  tags: 
+    - nginxctr-repo
+    - helm-repo
+
+    
+    
+- name: rancher  repository 추가 
+  kubernetes.core.helm_repository:
+    name: "rancher-latest"
+    repo_url: "https://releases.rancher.com/server-charts/latest"
+  tags: 
+    - rancher-repo
+    - helm-repo
+    
+
+
+- name: grafana  repository 추가 
+  kubernetes.core.helm_repository:
+    name: "grafana"
+    repo_url: https://grafana.github.io/helm-charts
+  tags: 
+    - grafana-repo
+    - helm-repo
+
+    
+
+
+- name: jenkins  repository 추가 
+  kubernetes.core.helm_repository:
+    name: jenkins
+    repo_url: https://charts.jenkins.io
+  tags: 
+    - jenkins-repo
+    - helm-repo
+    
+
+
+- name: gradiant  repository 추가 
+  kubernetes.core.helm_repository:
+    name: gradiant
+    repo_url: https://gradiant.github.io/bigdata-charts/
+  tags: 
+    - gradiant-repo
+    - helm-repo
+    
+
+
+- name: incubator  repository 추가 
+  kubernetes.core.helm_repository:
+    name: incubator
+    repo_url: https://charts.helm.sh/incubator 
+  tags: 
+    - incubator-repo
+    - helm-repo
+    
+
+
+
+- name: stable  repository 추가 
+  kubernetes.core.helm_repository:
+    name: stable
+    repo_url: https://charts.helm.sh/stable 
+  tags: 
+    - stable-repo
+    - helm-repo
+    
+
+
+- name: locust chart  repository 추가 
+  kubernetes.core.helm_repository:
+    name: deliveryhero
+    repo_url: https://charts.deliveryhero.io 
+  tags: 
+    - locust-repo
+    - helm-repo
+    
+
+
+
+
+- name: litmuschaos chart  repository 추가 
+  kubernetes.core.helm_repository:
+    name: litmuschaos
+    repo_url: https://litmuschaos.github.io/litmus-helm/
+  tags: 
+    - litmus-repo
+    - helm-repo
+
+- name: goharbor chart  repository 추가 
+  kubernetes.core.helm_repository:
+    name: harbor
+    repo_url: https://helm.goharbor.io
+  tags: 
+    - harbor-repo
+    - helm-repo
+
+- name: k8s-at-home repository 추가 
+  kubernetes.core.helm_repository:
+    name: k8s-at-home
+    repo_url: https://k8s-at-home.com/charts/
+  tags: 
+    - uptime-kuma-repo
+    - helm-repo
+
+
+
+
+
+############### helm repo update ####################
+- name: helm repo update
+  shell: |
+    helm repo update
+  tags: 
+    - helm-update
+    - helm-repo
+
+    
+

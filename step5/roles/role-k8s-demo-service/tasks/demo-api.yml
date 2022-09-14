@@ -1,0 +1,153 @@
+---
+- name: "[필수사항 체크] Ingress Controller 설치 여부 체크"
+  shell: | 
+    kubectl get pod -n {{GLB_INGRESS_NAMESPACE}} | grep {{DEMO_API_INGRESS_CLASS}} |wc -l
+  register: output
+  failed_when:  "output.stdout|float < 1"
+  tags:
+    - demo-api
+    - demo-project
+    - demo-ex
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+- name: Create a api namespace
+  kubernetes.core.k8s:
+    name: "{{DEMO_API_NAMESPACE}}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  tags: 
+    - demo-api
+    - demo-project
+    - demo-ex
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+#### demo-api-configmap 배포
+- name: demo-api-configmap 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "demo/demo-api/demo-api-configmap.yml.j2"
+  tags: 
+    - demo-api-configmap
+    - demo-api
+    - demo-project
+    - demo-ex
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+
+- name: demo-api 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "demo/demo-api/demo-api-deploy.yml.j2"
+  register: output
+  tags: 
+    - demo-api
+    - demo-project
+    - demo-ex
+
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - demo-api
+    - demo-project
+    - demo-ex
+#--[waiting]--
+- name: waiting for pod status Ready
+  shell: kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n "{{DEMO_API_NAMESPACE}}"
+  tags:
+    - demo-api
+    - demo-project
+    - demo-ex
+    
+
+- name: demo-ops-argocd-repo-add 
+  shell: |
+    argocd login --insecure {{ARGOCD_HOST}}  --username admin  --password {{ARGOCD_NEW_PASSWORD}} 
+    argocd repo add {{DEMO_OPS_REPO_URL}} --username {{DEMO_OPS_GIT_USER}} --password {{DEMO_OPS_GIT_SECRET}} --insecure-skip-server-verification
+  register: output
+  tags: 
+    - demo-ops-argocd
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - demo-ops-argocd
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+
+- name: demo-api-argocd-application 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "demo/demo-api/demo-api-argocd-apps.yml.j2"
+  register: output
+  tags: 
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+#--[waiting]--
+- name: waiting for pod status Ready
+  shell: |
+    ## argocd가 application 적용후 일정시간 배포 시간이 필요하다 
+    sleep 30 
+
+    kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n "{{DEMO_API_NAMESPACE}}"
+  tags:   
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+#### demo-api ingress 배포
+- name: demo-api ingress 배포 
+  kubernetes.core.k8s:
+    state: present
+    template: 
+      - path: "demo/demo-api/demo-api-ingress.yml.j2"
+  register: output
+  tags: 
+    - demo-api-ing
+    - demo-api
+    - demo-project
+    - demo-ex
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+#--[output]--
+- debug:
+    var: output
+  tags: 
+    - demo-api-ing
+    - demo-api
+    - demo-project
+    - demo-ex
+    - demo-api-argocd
+    - demo-project-argocd
+    - demo-ex-argocd
+
+
+
+    

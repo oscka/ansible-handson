@@ -1,0 +1,96 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-mysql
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: {{MYSQL_PV_STORAGE}} 
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mysql/data" 
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-mysql
+  namespace: {{MYSQL_NAMESPACE}}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{MYSQL_PV_STORAGE}} 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+  namespace: {{MYSQL_NAMESPACE}}
+  labels:
+    app: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+  - protocol: TCP
+    port: 3306 
+    targetPort: mysql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: {{MYSQL_NAMESPACE}}
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - image: {{MYSQL_IMAGE}}
+          name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: root.password
+            - name: MYSQL_ROOT_HOST # 접근 호스트
+              value: '%'
+
+            - name: MYSQL_DATABASE # 구성할 database명
+              value: blackstar
+            - name: MYSQL_USER # database에 권한이 있는 user
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: user.name
+            - name: MYSQL_PASSWORD # database에 권한이 있는 user의 패스워드
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: user.password
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: pvc-mysql
+
+
+          
+
