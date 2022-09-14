@@ -77,4 +77,6 @@ DEMO_API_ARGOCD_TARGET_REVISION: "pinpoint" ## default: main ,  revision: main, 
 DEMO_FE_ARGOCD_TARGET_REVISION: "pinpoint" ## default: main ,  revision: main, pinpoint
 
 
-PROMTAIL_MATCH_SELECTOR: '{namespace !~ "api|fe|argocd"}'  ## api, fe namespace 외는 모두 drop 한다
+PROMTAIL_MATCH_SELECTOR: '{namespace !~ "api|fe"}'  ## api, fe namespace 외는 모두 drop 한다
+LINUX_SED_REPLACE_COMMAND: "sed -i 's/0.0.0.0/{{ansible_host}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig"
+MAC_SED_REPLACE_COMMAND: "sed -i '' 's/0.0.0.0/{{ansible_host}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig"

@@ -34,11 +34,18 @@
     - k3s
   when: ansible_distribution == 'Ubuntu'
 
-
-- name: "kubeconfig remote.ip replace"
+- name: "kubeconfig remote.ip replace on Ubuntu"
   local_action: shell
-    sed -i '' 's/0.0.0.0/{{ansible_host}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig
+    {{LINUX_SED_REPLACE_COMMAND}}
   tags: 
     - k3s-config-sed
     - k3s
   when: ansible_distribution == 'Ubuntu'
+
+- name: "kubeconfig remote.ip replace on Mac"
+  local_action: shell
+    {{MAC_SED_REPLACE_COMMAND}}
+  tags: 
+    - k3s-config-sed
+    - k3s
+  when: ansible_distribution == 'MacOSX'
