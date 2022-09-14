@@ -212,3 +212,102 @@ task는 OS나 환경에 따라 실행되거나 되지 않도록 설정할 수 �
 export KUBECONFIG=/home/ska/.kube/k8s/kubeconfig
 ```
 
+이를 좀 더 편하게 하기 위해 direnv를 설치하여 ROOT경로에 해당 파일을 가져다 놓았습니다. 다음을 참고하여 사용하는 shell에 export 설정을 하고 이를 적용합니다. 
+
+```
+# direnv 설치
+## Ubuntu, Debian
+$ apt-get install direnv
+
+# direnv 적용
+## ZSH -> ~/.zshrc에 아래 내용 추가
+eval "$(direnv hook zsh)"
+
+# direnv 사용 - 자동으로 .envrc 디렉토리 하위에 해당 shell 환경이 적용됨
+# 아래와 같이 수동으로 로딩 가능
+direnv allow
+
+# 다음내용을 .envrc파일로 만들어 git root에 두고 적용
+export KUBECONFIG=/home/ska/.kube/k8s/kubeconfig
+```
+
+그밖의 클러스터 설치 관련 사항들은 다음과 같습니다.
+
+```
+# k3d-config.yml.j2
+hostPort: "{{K3D_HOST_PORT}}"  # 설정하지 않으면 바뀜(고정시켜야..)
+(...)
+  k3s: 
+    extraArgs: 
+      - arg: --tls-san={{ansible_host}}  # --> 주의!!:넣어주어야 remote 접속할 수 있음
+
+# argocd-ingress.yml.j2
+kind: Ingress  ## 각각의 프로젝트 소속이 되어야 함(같이 배포)
+(...)
+- host: "{{ARGOCD_HOST}}"   ## 붙을 수 있는 도메인
+
+# k8s-tool.yml
+
+become: true      # root권한으로 실행 가능
+
+  #--[output]-- 결과를 콘솔에 출력
+  - debug:
+      var: output
+    tags: 
+      - docker-restart
+      - tool-basic
+      - k8s-basic
+
+  # fact를 실행하여 출력
+  - name: Print all available facts
+    ansible.builtin.debug:
+      var: ansible_facts
+    tags: 
+      - facts
+
+# dev-k8s.yml
+
+    k3d cluster create --config  {{ component.INSTALL_ROOT }}/k3d/k3d-config.yml --wait # --wait는 클러스터 생성 완료까지 대기
+    k3d kubeconfig write {{K3D_ClUSTER_NAME}}  # KUBECONFIG 파일을 작성하여 줌
+
+  # pod가 ready일 때까지 대기
+  - name: waiting for pod status Ready
+    shell: |
+        kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n kube-system
+    tags: 
+      - k3d
+      - k8s-basic
+
+
+  shell: |
+    k3d cluster create {{K3D_ClUSTER_NAME}}  \ 
+        --agents {{K3D_AGENT}} \     # node갯수를 지정
+        -p 80:80@loadbalancer \      # 안,밖의 port를 연결(k3d는 k3s기반이며 k3s에서는 @loadbalancer를 붙여야 포트가 포워딩됨)
+        -p 443:443@loadbalancer \
+        -p {{K3D_EXTRA_PORT1}}:{{K3D_EXTRA_PORT1}}@loadbalancer \  # 3만대 이상은 NODEPORT이며 하드코딩(대안으로ingress를 잡는다)
+        -p {{K3D_EXTRA_PORT2}}:{{K3D_EXTRA_PORT2}}@loadbalancer \
+        -p {{K3D_EXTRA_PORT3}}:{{K3D_EXTRA_PORT3}}@loadbalancer \
+        -p {{K3D_EXTRA_PORT4}}:{{K3D_EXTRA_PORT4}}@loadbalancer \
+        {{K3D_OPTIONS1}} --wait   # K3D는 traefik이 기본이며 diasble(nginx로 대체)
+
+  # remote의 kubeconfig 파일을 로컬로 가져옴(원격 접속을 위해)
+  - name: "k3d fetch remote kubeconfig"
+    ansible.builtin.fetch:
+      src: "/home/{{ansible_user}}/.k3d/kubeconfig-{{K3D_ClUSTER_NAME}}.yaml"
+      dest: "{{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig"
+      flat: yes # 없으면 가져와서 만들어서 넣어 줌
+    tags: 
+
+    sed -i '' 's/0.0.0.0/{{ansible_host}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig  # 앞의 ''은 백업하지 말라는 의미
+
+# ingress-controller.yml
+
+  when: INGRESS_NGINX_ENABLE_SSLPASSTHROUGH == 'Y'  # 복호화를 하지 않고 https 요청 자체를 넘김    
+
+
+
+
+
+```
+
+
