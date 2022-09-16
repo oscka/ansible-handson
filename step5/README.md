@@ -4,7 +4,7 @@ Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝�
 
 ## 구성
 
-이 ansible 설치 프로젝트는 다음과 같은 구성요소들을 설치합니다.
+이 ansible 설치 프로젝트는 다음과 같은 구성요소들을 설치합니다. 
 
 - 기본 도구성 유틸, helm3
 - k3s 클러스터, ingress-nginx
@@ -21,7 +21,7 @@ Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝�
 #LOCAL_USER_HOME: "/Users/blackstar"
 LOCAL_USER_HOME: "/home/ska"
 
-#playbook-run-all.yml의 다음 내용을 경로에 맞게 수정
+# playbook-run-all.yml의 다음 내용을 경로에 맞게 수정
   vars:
     - ROLES_PATH: /home/ska/git/oscka/ansible-handson/step5/roles
 
@@ -30,8 +30,11 @@ LOCAL_USER_HOME: "/home/ska"
 이후 playbook 하위 경로에서 다음과 같이 실행하여 설치를 실행할 수 있습니다.
 
 ```
-./run-play.sh  "tool-basic, helm-repo,k3s, ingress-nginx, argocd,   loki-stack, pinpoint, mysql, demo-api-argocd,demo-fe-argocd"
+./run-play.sh  "tool-basic, helm-repo,k3s, ingress-nginx, argocd, loki-stack, pinpoint, mysql, demo-api-argocd,demo-fe-argocd"
 ```
+
+오류가 발생할 경우 오류가 발생한 시점 이후의 tag를 확인하여 해당 부분만 재실행하는 방식으로 설치를 이어 갈 수 있습니다. 
+
 
 ## 확인
 
@@ -57,7 +60,7 @@ grafana 접속 후 좌측 메뉴의 explorer - Log Browser 선택한 뒤 namespa
 
 **pinpoint 접속하여 APM 및 서버 모니터링 결과 확인**
 
-**mysql client를 통한 DB접속 확인**
+**mysql client를 통한 DB접속 확인 - ingress를 통해 TCP 내부접속 가능**
 
 ## 그밖의 내용들
 
@@ -112,7 +115,7 @@ promtail은 loki, grafana와 함께 로그를 통합 모니터링 할수 있게 
     definition: 
       apiVersion: v1
       kind: Secret
-      type: Opaque           
+      type: Opaque       
       metadata:
         name: "{{ PROMTAIL_SECRET_NAME }}"
         namespace: "{{ PROMTAIL_NAMESPACE | lower }}"   
@@ -127,7 +130,6 @@ promtail은 loki, grafana와 함께 로그를 통합 모니터링 할수 있게 
     - demo-ex-argocd
 ```
 
-
 promtail-config를 변경할 경우 다음과 같이 작업합니다.
 
 ```
@@ -138,7 +140,6 @@ PROMTAIL_MATCH_SELECTOR: '{namespace !~ "api|fe|argocd"}'  ## api, fe namespace 
 ./run-play.sh  "promtail-config"
 
 ```
-
 
 ### argocd에서 yaml로 배포
 

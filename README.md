@@ -6,12 +6,12 @@
 
 ## 사전설치
 
-핸즈온 실행을 위해 vagrant와 ansible은 사전 설치가 필요합니다. 
+핸즈온 실행을 위해 vagrant와 ansible은 사전 설치가 필요합니다.
 ansible 버전은 가급적 맞추는 것이 좋습니다. 버전이 다를 경우 실행 자체가 되지 않는 경우가 있습니다.
 (글 작성 시점-2022.09.10-기준)
 
 - Vagrant(version 2.3.0) - https://www.vagrantup.com/downloads
-- Ansible(version 2.13.4) -  
+- Ansible(version 2.13.4) -
   - 참고:(ubuntu에서 최신버전 설치하기)[https://www.cyberciti.biz/faq/how-to-install-and-configure-latest-version-of-ansible-on-ubuntu-linux/]
 
 ## 구성요소
@@ -19,13 +19,51 @@ ansible 버전은 가급적 맞추는 것이 좋습니다. 버전이 다를 경�
 - Vagrant - mac, window, linux OS플랫폼 별로 존재하나 vagrant로 구동될 OS는 ubuntu/focal64 공식 이미지를 사용합니다. 2개 vm을 실행하여 설치 과정을 테스트하며 수시로 삭제하고 재생성해야 합니다.
 - ansible - 플랫폼을 가리지 않으나 가급적 mac혹은 linux를 사용하는 것을 권장합니다.
 
-바깥의 OS -> 2개의 vm으로 ssh로 연결하여 ansible이 실행되며 이를 위해 vagrant의 ssh정보를 이용합니다. 
+바깥의 OS -> 2개의 vm으로 ssh로 연결하여 ansible이 실행되며 이를 위해 vagrant의 ssh정보를 이용합니다.
 
 ssh key조회를 위해서 vagrant ssh-config 를 통해 확인한 뒤 각 step의 hosts-vm안에 경로에 해당 key파일의 경로를 넣어야 ansible이 이를 통해 설치를 수행할 수 있습니다.
 
 ## 핸즈온 Steps
 
 ### step0(준비)
+
+#### vm실행하기
+
+test-vm1,test-vm2 디렉토리에는 Vagrant를 통해 실행되는 vm의 설정(Vagrantfile)들이 들어 있습니다. vagrant는 디렉토리 단위로 vm이 관리되며 연결된 provider(가상머신관리자)에 따라 각 가상머신을 생성하고 실행합니다. 일반적으로는 virtualbox를 많이 사용하며 로컬환경에 vagrant와 virtualbox가 설치되어 있다면 다음과 같이 가상머신을 up해주면 vm이 기동됩니다.
+
+```bash
+cd ./test-vm1
+# 생성 및 기동
+➜  test-vm1 git:(main) ✗ vagrant up
+Bringing machine 'default' up with 'virtualbox' provider...
+==> default: Importing base box 'ubuntu/focal64'...
+==> default: Matching MAC address for NAT networking...
+==> default: Checking if box 'ubuntu/focal64' version '20220905.0.0' is up to date...
+==> default: A newer version of the box 'ubuntu/focal64' for provider 'virtualbox' is
+==> default: available! You currently have version '20220905.0.0'. The latest is version
+==> default: '20220913.0.0'. Run `vagrant box update` to update.
+==> default: Setting the name of the VM: test-vm1
+==> default: Clearing any previously set network interfaces...
+==> default: Preparing network interfaces based on configuration...
+    default: Adapter 1: nat
+    default: Adapter 2: hostonly
+==> default: Forwarding ports...
+    default: 22 (guest) => 2222 (host) (adapter 1)
+==> default: Running 'pre-boot' VM customizations...
+==> default: Booting VM...
+==> default: Waiting for machine to boot. This may take a few minutes...
+(...)
+# 정지
+➜  test-vm1 git:(main) ✗ vagrant halt
+# 삭제
+➜  test-vm1 git:(main) ✗ vagrant destroy -f
+==> default: Forcing shutdown of VM...
+==> default: Destroying VM and associated drives...
+~/git/oscka/ansible-handson/test-vm1
+```
+
+
+#### ssh 접속 설정하기
 
 처음 vm을 실행하고 ansible ping을 성공하기 위해 ssh로 대상을 신뢰하는 host로 등록이 되어 있어야 합니다.
 
@@ -212,7 +250,7 @@ task는 OS나 환경에 따라 실행되거나 되지 않도록 설정할 수 �
 export KUBECONFIG=/home/ska/.kube/k8s/kubeconfig
 ```
 
-이를 좀 더 편하게 하기 위해 direnv를 설치하여 ROOT경로에 해당 파일을 가져다 놓았습니다. 다음을 참고하여 사용하는 shell에 export 설정을 하고 이를 적용합니다. 
+이를 좀 더 편하게 하기 위해 direnv를 설치하여 ROOT경로에 해당 파일을 가져다 놓았습니다. 다음을 참고하여 사용하는 shell에 export 설정을 하고 이를 적용합니다.
 
 ```bash
 # direnv 설치
@@ -302,7 +340,7 @@ become: true      # root권한으로 실행 가능
 
 # ingress-controller.yml
 
-  when: INGRESS_NGINX_ENABLE_SSLPASSTHROUGH == 'Y'  # 복호화를 하지 않고 https 요청 자체를 넘김    
+  when: INGRESS_NGINX_ENABLE_SSLPASSTHROUGH == 'Y'  # 복호화를 하지 않고 https 요청 자체를 넘김  
 
 ```
 
@@ -311,7 +349,3 @@ become: true      # root권한으로 실행 가능
 Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝트를 배포하며 이를 모니터링(loki, grafana, pinpoint)하는 부분까지를 설치하고 테스트 할 수 있습니다.
 
 Step5는 내용이 많아 별도의 문서로 기술합니다. [Step5](./step5/README.md)
-
-
-
-
