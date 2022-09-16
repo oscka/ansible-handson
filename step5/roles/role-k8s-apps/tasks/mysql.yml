@@ -9,6 +9,7 @@
     - demo-ex
     - demo-ex-argocd
 
+# ingress-nginx는 설치되었으나, 설정을 업데이트하기 위해 upgrade --install함, 없으면 설치 있으면 upgrade
 - name: "ingress-nginx  controller upgrade : tcp 3306 mysql 설정"
   kubernetes.core.helm:
     name: ingress-nginx
@@ -56,7 +57,7 @@
     name: "{{MYSQL_NAMESPACE}}"
     api_version: v1
     kind: Namespace
-    state: present
+    state: present  # absent이면 삭제, present면 설치
   tags: 
     - mysql
     - demo-ex
@@ -103,8 +104,8 @@
 
 - name:  sample board data 업로드
   copy:
-    src: db/mysql/board.sql
-    dest:  "{{ component.INSTALL_ROOT }}/db/"  
+    src: db/mysql/board.sql   #file 경로 하위로부터 찾기 시작
+    dest:  "{{ component.INSTALL_ROOT }}/db/"  # db/ 디렉토리, db 파일로 인식(/를 넣어주어야 함)
   tags: 
     - mysql
     - demo-ex

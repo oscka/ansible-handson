@@ -1,6 +1,9 @@
 ---
 ############## k3s ##################### 
 
+# K3S는 IOT를 위한 Light한 쿠버네티스 : CLI는 별도로 없고 sh로 바로 받아서 실행함
+# 개발, 테스트용으로는 사용에 무리가 없음
+# traefik이 디폴트 ingress controller이나 nginx를 쓰기 위해 제외함
 - name: "[ubuntu] k3s master 설치 k8s_k3s_ver={{K3S_VERSION}}"
   shell: |
     curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{K3S_VERSION}} sh -s - --write-kubeconfig-mode 644 {{K3S_OPTIONS}}
@@ -12,6 +15,7 @@
     - k3s 
   when: ansible_distribution == 'Ubuntu'
 
+# DEBUG 출력을 위해 task마다 넣어야 함, TAG가 없으면 출력되지 않음
 - debug:
     var: output
   tags: 
@@ -34,6 +38,8 @@
     - k3s
   when: ansible_distribution == 'Ubuntu'
 
+# local_action은 원격이 아니고 로컬에서 실행되는 task
+# ansible_distribution은 원격의 정보이며 ansible fact로부터 가져옴
 - name: "kubeconfig remote.ip replace on Ubuntu"
   local_action: shell
     {{LINUX_SED_REPLACE_COMMAND}}
@@ -42,6 +48,7 @@
     - k3s
   when: ansible_distribution == 'Ubuntu'
 
+# local_action은 원격이 아니고 로컬에서 실행되는 task
 - name: "kubeconfig remote.ip replace on Mac"
   local_action: shell
     {{MAC_SED_REPLACE_COMMAND}}

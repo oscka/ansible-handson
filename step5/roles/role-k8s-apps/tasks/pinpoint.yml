@@ -11,6 +11,8 @@
     - demo-ex
     - demo-ex-argocd
 
+# 공식 helm chart가 없음 - chart museum에 없어서 다운로드 하여 바이너리를 file 경로에 넣어두었음
+# chart의 버전부분을 수정하고 맞추는 작업을 수작업으로 미리 해 두었음.
 - name: pinpoint chart 업로드
   copy:
     src: "pinpoint/pinpoint-{{PINPOINT_VERSION}}.tgz"
@@ -23,10 +25,10 @@
   when: ansible_distribution == 'Ubuntu'
 
 - name: "pinpoint chart Extract  pinpoint-{{PINPOINT_VERSION}}.tgz"
-  ansible.builtin.unarchive:
+  ansible.builtin.unarchive:  # 압축을 해제하면서 파일 이동
     src: "{{ component.INSTALL_ROOT }}/pinpoint/pinpoint-{{PINPOINT_VERSION}}.tgz"
     dest: "{{ component.INSTALL_ROOT }}/pinpoint/"
-    remote_src: yes
+    remote_src: yes # 둘다 remote에서 일어나야 함
   tags: 
     - pinpoint-unarc
     - pinpoint

@@ -27,7 +27,7 @@
     - demo-ex
     - demo-ex-argocd
   
-
+# blue-green,canary를 위한 플러그인
 - name: argo-rollouts 설치 
   shell: |
     kubectl create ns argo-rollouts
@@ -41,7 +41,7 @@
     - demo-ex-argocd
   when: ARGO_ROLLOUTS_YN == 'Y' 
 
-
+# 자동으로 변경된 이미지의 버전을 gitops에 업데이트 해주는 플러그인
 - name: argocd image_updater 설치 
   shell: |
     kubectl -n argocd apply  -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/manifests/install.yaml
@@ -62,7 +62,7 @@
 
 
 - name: argocd ingress 설치 
-  kubernetes.core.k8s:
+  kubernetes.core.k8s: #template을 이용해 ingress생성시 동적으로 생성
     state: present
     template: 
       - path: "argocd/argocd-ingress.yml.j2"
@@ -82,6 +82,7 @@
     - demo-ex
     - demo-ex-argocd
 
+# argocd를 위한 ingress 생성 후 적용될때까지 다소 시간이 소요됨(sleep 10은 그런 상황을 위한 부분임)
 - name: agrocd  change account password
   shell: |
     sleep 10

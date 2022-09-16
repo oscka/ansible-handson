@@ -16,7 +16,7 @@
  
 
   
-
+# loki-stack으로 설치시 버전이 낮아 각각 별도로 설치-loki,promtail,grafana
 ########### loki ###################
 - name: "loki 설치 (chart ver: {{LOKI_CHART_VERSION}}"
   kubernetes.core.helm:
@@ -96,14 +96,15 @@
 - name: promtail SECRET 생성 
   kubernetes.core.k8s:
     state: present
-    definition: 
+    definition: #yaml의 definition을 정의하여 생성할 수 있음 
       apiVersion: v1
       kind: Secret
       type: Opaque             
       metadata:
         name: "{{ PROMTAIL_SECRET_NAME }}"
         namespace: "{{ PROMTAIL_NAMESPACE | lower }}"     
-      data:
+      data: # 템플릿을 생성하여 base64로 인코딩하여 promtail.yaml이라는 secret으로 생성
+      #lookup('template', PROMTAIL_TEMPLATES_PATH + '/promtail-secret-data.j2' ) -> 템플릿 파일을 찾는 명령
         promtail.yaml: "{{ lookup('template', PROMTAIL_TEMPLATES_PATH + '/promtail-secret-data.j2' ) | b64encode }}"
   register: output
   tags: 
@@ -114,11 +115,11 @@
     - demo-ex-argocd
   
 
-
+# pod를 재기동한 뒤(rollout restart) 적용된 결과를 한 번 다시 확인함
 - name: promtail daemonset refresh 
   shell: |
     kubectl rollout restart  ds/{{PROMTAIL_SECRET_NAME}} -n {{PROMTAIL_NAMESPACE}}
-    
+
     echo
     echo
     echo "================ promtail-config decoding ================================"
@@ -140,9 +141,11 @@
     - demo-ex
     - demo-ex-argocd
 
+#pod가 아니라 rollout의 status를 기다림(다른 node의 데몬셋일 수 있음)
 - name: waiting for daemonset rollout  pod   status Ready
   shell: |
       kubectl rollout status ds/{{PROMTAIL_SECRET_NAME}} -n {{PROMTAIL_NAMESPACE}}
+      # 아래 명령들은 다른 node의 데몬셋에서는 효과가 없어서 제외
       # kubectl wait ds/{{PROMTAIL_SECRET_NAME}} --timeout=-1s --for condition=available  -n {{PROMTAIL_NAMESPACE}}
       # sleep 20  ## promtail daemonset reloading 되는 시간동안 waiting
       # kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n {{PROMTAIL_NAMESPACE}}
@@ -185,7 +188,8 @@
 
 
 ##### [ grafana ] #######
-## grafana chart 특정버전 설치 이슈가 있어서 url download chart로 설치 하였다 
+## grafana chart 특정버전 설치 이슈가 있어서 url download chart로 설치 하였다(직접 다운로드)
+#### -> log browser가 특정버전 이후로 없어져서 그 이전 버전을 설치하였음.
 - name: "grafana-with chart ver: {{GRAFANA_CHART_VERSION}} from url"
   kubernetes.core.helm:
     name: grafana

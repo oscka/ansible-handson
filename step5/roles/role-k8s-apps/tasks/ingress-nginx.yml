@@ -1,18 +1,20 @@
 ---
 ######## nginx ingress controller #########
 
+# 외부로부터 접속을 받기 위한 ingrss controller
+# 요청을 받아서 argocd등의 ingress 쪽과 연결해주는 역할을 한다.
 - name: ingress-nginx  controller 설치 - ssl_passthrough 사용 (enable ssl_passthrough)
   kubernetes.core.helm:
     name: ingress-nginx
     chart_ref: "{{INGRESS_NGINX_CHART}}"
     chart_version: "{{INGRESS_NGINX_CHART_VERSION}}"
     release_namespace: "{{INGRESS_NGINX_NAMESPACE}}"
-    create_namespace: true   
+    create_namespace: true   # chart생성시 namespace가 없으면 생성하고 실행
     wait: true
     values:
       controller: 
         extraArgs:
-          enable-ssl-passthrough: true
+          enable-ssl-passthrough: true    # ssl-passthrough를 enable하여 ssl요청을 복호화 하지 않고 뒤로 넘김
   when: INGRESS_NGINX_ENABLE_SSLPASSTHROUGH == 'Y'
      
   register: output
