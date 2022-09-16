@@ -39,11 +39,11 @@ DEMO_API_DB_URL: "mysql-svc.db.svc:3306" ## k8s: mysql-svc.db.svc:3306 , k3d-doc
 
 
 # ## demo-api (apm 적용 없을 경우)
-# DEMO_API_IMAGE: "saturn203/demo-api:stable-1.0"
+# DEMO_API_IMAGE: "oscka/demo-api:stable-1.0"
 # ## demo-api apm 적용시
-# DEMO_API_IMAGE_ELASTIC_APM: "saturn203/demo-api:elastic-apm-v1.0"
+# DEMO_API_IMAGE_ELASTIC_APM: "oscka/demo-api:elastic-apm-v1.0"
 # ## pinpoint apm 적용시
-# DEMO_API_IMAGE_PINPOINT_APM: "saturn203/demo-api:pinpoint-apm-v1.0"
+# DEMO_API_IMAGE_PINPOINT_APM: "oscka/demo-api:pinpoint-apm-v1.0"
 
 
 # DEMO_API_ARGOCD_DEPLOY_TYPE: "rolling" ## default: rolling  deploy_type: rolling, bluegreen, canary
@@ -67,11 +67,11 @@ DEMO_API_ARGOCD_TARGET_REVISION: "pinpoint" ## default: main ,  revision: main, 
 # DEMO_FE_DEMO_API_URL: "demo-api-svc.api.svc:8080" ## api url 
 
 # ## demo-fe (apm 적용 없을 경우)
-# DEMO_FE_IMAGE: "saturn203/demo-fe:stable-1.0"
+# DEMO_FE_IMAGE: "oscka/demo-fe:stable-1.0"
 # ## es-apm 적용시
-# DEMO_FE_IMAGE_ELASTIC_APM: "saturn203/demo-fe:elastic-apm-v1.0"
+# DEMO_FE_IMAGE_ELASTIC_APM: "oscka/demo-fe:elastic-apm-v1.0"
 # ## pinpoint apm 적용시
-# DEMO_FE_IMAGE_PINPOINT_APM: "saturn203/demo-fe:pinpoint-apm-v1.0"
+# DEMO_FE_IMAGE_PINPOINT_APM: "oscka/demo-fe:pinpoint-apm-v1.0"
 
 # DEMO_FE_ARGOCD_DEPLOY_TYPE: "rolling" ## default: rolling  deploy_type: rolling, bluegreen, canary
 DEMO_FE_ARGOCD_TARGET_REVISION: "pinpoint" ## default: main ,  revision: main, pinpoint

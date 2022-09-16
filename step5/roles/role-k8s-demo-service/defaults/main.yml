@@ -32,9 +32,10 @@ PINPOINT_APM_COLLECTOR_IP: "pinpoint-pinpoint-collector.pinpoint-system.svc"
 
 
 ##########demo-project##############
-DEMO_OPS_REPO_URL: "https://github.com/io203/demo-ops.git"
-DEMO_OPS_GIT_USER: "io203"
-DEMO_OPS_GIT_SECRET: "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"
+DEMO_OPS_REPO_URL: "https://github.com/oscka/demo-ops.git"
+DEMO_OPS_REPO_PRIVATE: "N"
+DEMO_OPS_GIT_USER: "user-id"
+DEMO_OPS_GIT_SECRET: ""
 
 ######### demo-api #################
 DEMO_API_NAMESPACE: "api"
@@ -51,11 +52,11 @@ DEMO_API_DB_PASSWORD: "1234"
 
 
 ## demo-api (apm 적용 없을 경우)
-DEMO_API_IMAGE: "saturn203/demo-api:stable-1.0"
+DEMO_API_IMAGE: "oscka/demo-api:stable-1.0"
 ## demo-api apm 적용시
-DEMO_API_IMAGE_ELASTIC_APM: "saturn203/demo-api:elastic-apm-v1.0"
+DEMO_API_IMAGE_ELASTIC_APM: "oscka/demo-api:elastic-apm-v1.0"
 ## pinpoint apm 적용시
-DEMO_API_IMAGE_PINPOINT_APM: "saturn203/demo-api:pinpoint-apm-v1.0"
+DEMO_API_IMAGE_PINPOINT_APM: "oscka/demo-api:pinpoint-apm-v1.0"
 
 
 DEMO_API_ARGOCD_DEPLOY_TYPE: "rolling" ## default: rolling  deploy_type: rolling, bluegreen, canary
@@ -79,11 +80,11 @@ DEMO_FE_NODE_PORT: 30001
 DEMO_FE_DEMO_API_URL: "demo-api-svc.api.svc:8080" ## api url 
 
 ## demo-fe (apm 적용 없을 경우)
-DEMO_FE_IMAGE: "saturn203/demo-fe:stable-1.0"
+DEMO_FE_IMAGE: "oscka/demo-fe:stable-1.0"
 ## es-apm 적용시
-DEMO_FE_IMAGE_ELASTIC_APM: "saturn203/demo-fe:elastic-apm-v1.0"
+DEMO_FE_IMAGE_ELASTIC_APM: "oscka/demo-fe:elastic-apm-v1.0"
 ## pinpoint apm 적용시
-DEMO_FE_IMAGE_PINPOINT_APM: "saturn203/demo-fe:pinpoint-apm-v1.0"
+DEMO_FE_IMAGE_PINPOINT_APM: "oscka/demo-fe:pinpoint-apm-v1.0"
 
 DEMO_FE_ARGOCD_DEPLOY_TYPE: "rolling" ## default: rolling  deploy_type: rolling, bluegreen, canary
 DEMO_FE_ARGOCD_TARGET_REVISION: "main" ## default: main ,  revision: main, pinpoint

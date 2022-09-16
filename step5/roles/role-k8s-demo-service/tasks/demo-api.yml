@@ -79,6 +79,7 @@
     - demo-api-argocd
     - demo-project-argocd
     - demo-ex-argocd
+  when: DEMO_OPS_REPO_PRIVATE == 'Y'
 
 #--[output]--
 - debug:

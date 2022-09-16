@@ -12,7 +12,7 @@ spec:
     namespace: {{DEMO_FE_NAMESPACE}}
   project: default
   source:
-    repoURL: 'https://github.com/io203/demo-ops.git'
+    repoURL: '{{DEMO_OPS_REPO_URL}}'
     path: demo-fe/{{DEMO_FE_ARGOCD_DEPLOY_TYPE}}
     targetRevision: {{DEMO_FE_ARGOCD_TARGET_REVISION}}
     
