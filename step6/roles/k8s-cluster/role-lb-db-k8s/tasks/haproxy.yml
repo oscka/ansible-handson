@@ -1,0 +1,64 @@
+---
+- name:  Create haproxy  directory if it does not exist
+  file:
+    path: "{{ component.INSTALL_ROOT }}/docker/haproxy"
+    state: directory
+  tags: 
+    - haproxy-lb4-k8s-config-upload
+    - haproxy-lb4-k8s  
+    - k8s-cluster-multi-pre   
+  when: "'lb4k8s' in group_names"
+
+- name: haproxy-config upload 업로드
+  template:
+    src: haproxy/haproxy-config.yml.j2
+    dest: "{{ component.INSTALL_ROOT }}/docker/haproxy/haproxy.cfg"
+  tags: 
+    - haproxy-lb4-k8s-config-upload
+    - haproxy-lb4-k8s
+    - k8s-cluster-multi-pre
+  when: "'lb4k8s' in group_names"
+
+- name: haproxy docker-compose upload
+  template:
+    src: haproxy/haproxy-docker-compose.yml.j2
+    dest: "{{ component.INSTALL_ROOT }}/docker/haproxy/docker-compose.yml"
+  register: output
+  tags: 
+    - haproxy-lb4-k8s
+    - k8s-cluster-multi-pre
+  when: "'lb4k8s' in group_names"
+
+
+
+- name: haproxy-lb4-k8s container 설치  
+  community.docker.docker_compose:    
+    project_src: "{{ component.INSTALL_ROOT }}/docker/haproxy/" 
+    services: haproxy
+  register: output
+  tags: 
+    - haproxy-lb4-k8s
+    - k8s-cluster-multi-pre
+  when: "'lb4k8s' in group_names"
+
+#--out---
+- debug:
+    var: output
+  tags: 
+    - haproxy-lb4-k8s
+    - k8s-cluster-multi-pre
+  when: "'lb4k8s' in group_names"
+
+    
+
+#### nginx-proxy service down 
+- name: haproxy-lb4-k8s service  uninstall  
+  community.docker.docker_compose:    
+    project_src: "{{ component.INSTALL_ROOT }}/docker/haproxy/" 
+    services: haproxy
+    state: absent
+  register: output
+  tags: 
+    - haproxy-lb4-k8s-down   
+    - k8s-cluster-multi-delete
+  when: "'lb4k8s' in group_names"

@@ -1,0 +1,14 @@
+frontend https-in
+    bind 0.0.0.0:6443
+    option tcplog
+    mode tcp
+    default_backend k8s-masters
+
+backend k8s-masters
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    option tcplog
+{% for h in groups['masters'] %}
+    server {{h}} {{ hostvars[h].ansible_host }}:6443 check
+{% endfor %} 

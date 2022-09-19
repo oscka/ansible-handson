@@ -1,0 +1,21 @@
+
+[lb4k8s]
+lb-k8s ansible_host=43.201.54.174 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/lightsail-key.pem
+
+
+[users]
+user-master1 ansible_host=13.125.220.126 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/lightsail-key.pem
+user-master2 ansible_host=43.200.244.14 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/lightsail-key.pem
+user-master3 ansible_host=54.180.136.64 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/lightsail-key.pem
+
+user-worker1 ansible_host=3.36.26.172 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/lightsail-key.pem
+user-worker2 ansible_host=3.35.138.167 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/lightsail-key.pem
+
+[masters]
+master1 ansible_host=13.125.220.126 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/aws-my-ssh
+master2 ansible_host=43.200.244.14 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/aws-my-ssh
+master3 ansible_host=54.180.136.64 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/aws-my-ssh
+
+[workers]
+worker1 ansible_host=3.36.26.172 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/aws-my-ssh
+worker2 ansible_host=3.35.138.167 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/Users/blackstar/.ssh/aws/aws-my-ssh
