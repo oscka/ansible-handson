@@ -1,6 +1,0 @@
----
-# defaults file for role-k8s-master
-
-########## host info #################
-HOST_IP: "{{ansible_host}}"
-LOCAL_USER_HOME: "/Users/blackstar"

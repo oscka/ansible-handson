@@ -1,4 +1,0 @@
----
-# defaults file for role-k8s-lb
-
-USER_NAME: "{{ ansible_user }}"
