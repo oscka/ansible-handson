@@ -347,4 +347,10 @@ become: true      # root권한으로 실행 가능
 
 Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝트를 배포하며 이를 모니터링(loki, grafana, pinpoint)하는 부분까지를 설치하고 테스트 할 수 있습니다.
 
-Step5는 내용이 많아 별도의 문서로 기술합니다. - [Step5 이동](./step5/README.md)
+Step5는 내용이 많아 별도의 문서로 기술합니다. [Step5](./step5/README.md)
+
+### Step6
+
+Step6에서는 Multi Master Cluster를 구성하는 방법을 설명합니다.
+
+Step6 역시 별도의 문서로 기술합니다. - [Step6 로 이동](./step6/README.md)
