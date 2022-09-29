@@ -1,0 +1,45 @@
+---
+- hosts: "all"    # hosts들을 그룹으로 묶어 task를 지정 가능
+  tasks:
+    - name: "[pre] apt update"
+      apt:
+        update_cache: yes
+      become: true
+      tags: k8s-pre
+
+
+- name: create k8s user
+  import_playbook: sub-playbook/playbook-user.yml
+  tags: 
+    - k8s-user
+ 
+
+- name: install k8s-tools 
+  import_playbook: sub-playbook/playbook-k8s-tools.yml
+  tags: 
+    - k8s-tools
+ 
+
+- hosts: "lb4k8s"
+  vars: 
+  -  ROLES_PATH: /home/ska/git/oscka/ansible-handson/step6/roles
+  roles:
+    - role: "{{ROLES_PATH}}/k8s-cluster/role-lb-db-k8s"
+
+- hosts: "masters"    # hosts들을 그룹으로 묶어 task를 지정 가능
+  serial: 1  #순서대로 설치해라(병렬이 아니고 하나씩 설치. 기본은 동시에 병렬로 설치함)
+  vars:
+  - ROLES_PATH: /home/ska/git/oscka/ansible-handson/step6/roles
+  roles:
+    - role: "{{ROLES_PATH}}/k8s-cluster/role-k8s-master"
+
+- hosts: "workers"
+  serial: 1
+  vars:
+  - ROLES_PATH: /home/ska/git/oscka/ansible-handson/step6/roles
+  roles:
+    - role: "{{ROLES_PATH}}/k8s-cluster/role-k8s-worker"
+    
+    
+
+

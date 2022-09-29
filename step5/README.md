@@ -4,12 +4,16 @@ Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝�
 
 ## 구성
 
-이 ansible 설치 프로젝트는 다음과 같은 구성요소들을 설치합니다. 
+이 ansible 설치 프로젝트는 다음과 같은 구성요소들을 설치합니다.
 
 - 기본 도구성 유틸, helm3
 - k3s 클러스터, ingress-nginx
 - ingress-nginx, argocd, loki-stack(grafana), pinpoint, mysql
 - demo-api,demo-fe
+
+vagrant를 통하여 설치하거나, aws 등의 클라우드 환경에서 ansible을 통해 설치할 수 있습니다.
+
+(설치 대상 vm은 2 core, 8 GB ram 이상의 사양 필요하며 vagrant, aws lightsail, azure에서 테스트 완료하였음)
 
 ## 실행
 
@@ -19,7 +23,7 @@ Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝�
 
 # step5/roles/role-k8s-apps/defaults/main.yml 의 다음 내용을 로컬환경 경로에 맞게 수정
 #LOCAL_USER_HOME: "/Users/blackstar"
-LOCAL_USER_HOME: "/home/ska"
+LOCAL_USER_HOME: "/home/$USER"
 
 # playbook-run-all.yml의 다음 내용을 경로에 맞게 수정
   vars:
@@ -29,12 +33,11 @@ LOCAL_USER_HOME: "/home/ska"
 
 이후 playbook 하위 경로에서 다음과 같이 실행하여 설치를 실행할 수 있습니다.
 
-```
+```bash
 ./run-play.sh  "tool-basic, helm-repo,k3s, ingress-nginx, argocd, loki-stack, pinpoint, mysql, demo-api-argocd,demo-fe-argocd"
 ```
 
-오류가 발생할 경우 오류가 발생한 시점 이후의 tag를 확인하여 해당 부분만 재실행하는 방식으로 설치를 이어 갈 수 있습니다. 
-
+오류가 발생할 경우 오류가 발생한 시점 이후의 tag를 확인하여 해당 부분만 재실행하는 방식으로 설치를 이어 갈 수 있습니다.
 
 ## 확인
 
@@ -42,7 +45,7 @@ LOCAL_USER_HOME: "/home/ska"
 
 설치 완료 후 다음과 같은 주소에서 각 서비스에 접속하여 확인할 수 있으며 접속하여 그 결과를 확인합니다.
 
-**접속주소**
+**접속주소(vm에 설치시에는 해당 공인IP가 중간에 들어감)**
 
 - argocd - https://argocd.192.168.56.10.sslip.io
 - fe app - http://demo-fe.192.168.56.10.sslip.io/list
@@ -115,7 +118,7 @@ promtail은 loki, grafana와 함께 로그를 통합 모니터링 할수 있게 
     definition: 
       apiVersion: v1
       kind: Secret
-      type: Opaque       
+      type: Opaque   
       metadata:
         name: "{{ PROMTAIL_SECRET_NAME }}"
         namespace: "{{ PROMTAIL_NAMESPACE | lower }}"   
@@ -132,7 +135,7 @@ promtail은 loki, grafana와 함께 로그를 통합 모니터링 할수 있게 
 
 promtail-config를 변경할 경우 다음과 같이 작업합니다.
 
-```
+```bash
 # external-vars.yml 파일에 다음 내용을 추가(기존에는 api|fe만 존재)
 PROMTAIL_MATCH_SELECTOR: '{namespace !~ "api|fe|argocd"}'  ## api, fe namespace 외는 모두 drop 한다
 

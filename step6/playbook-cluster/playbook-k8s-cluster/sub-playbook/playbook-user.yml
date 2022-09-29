@@ -1,0 +1,25 @@
+---
+
+- hosts: 'users'
+  become: true
+  tasks:
+    - name: kube 유저 생성
+      user: 
+        name: kube 
+        append: yes 
+        state: present 
+        createhome: yes 
+        shell: /bin/bash
+
+    - name: kube 유저에게 sudo 권한 부여 
+      lineinfile:
+        path: /etc/sudoers
+        line: 'kube ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: kube 유저에 대한 authorized keys 세팅 (pub 키 세팅)
+      authorized_key: 
+        user: kube 
+        key: "{{item}}"
+      with_file:  # 로컬의 ssh 공개키 경로로 수정
+        - ~/.ssh/id_rsa.pub

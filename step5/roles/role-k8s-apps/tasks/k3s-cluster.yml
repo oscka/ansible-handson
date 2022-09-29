@@ -39,20 +39,18 @@
   when: ansible_distribution == 'Ubuntu'
 
 # local_action은 원격이 아니고 로컬에서 실행되는 task
-# ansible_distribution은 원격의 정보이며 ansible fact로부터 가져옴
-- name: "kubeconfig remote.ip replace on Ubuntu"
+# var을 통해 mac,ubuntu에 따라 조금 다른 명령이 실행됨
+- name: "kubeconfig remote.ip replace"
   local_action: shell
-    {{LINUX_SED_REPLACE_COMMAND}}
+    {{ command.SED_REPLACE_COMMAND }}
+  register: output
   tags: 
     - k3s-config-sed
     - k3s
   when: ansible_distribution == 'Ubuntu'
 
-# local_action은 원격이 아니고 로컬에서 실행되는 task
-- name: "kubeconfig remote.ip replace on Mac"
-  local_action: shell
-    {{MAC_SED_REPLACE_COMMAND}}
+- debug:
+    var: output
   tags: 
     - k3s-config-sed
     - k3s
-  when: ansible_distribution == 'MacOSX'

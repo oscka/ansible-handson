@@ -1,0 +1,8 @@
+---
+
+- name: import k8s-single-master
+  import_tasks: k8s/k8s-single-master.yml
+
+- name: import k8s-multi-master
+  import_tasks: k8s/k8s-multi-master.yml
+

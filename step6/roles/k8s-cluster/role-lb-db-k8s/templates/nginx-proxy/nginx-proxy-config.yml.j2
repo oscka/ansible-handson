@@ -1,0 +1,15 @@
+
+events {}
+
+stream {
+  upstream k3s_servers {
+{% for h in groups['masters'] %}
+    server {{ hostvars[h].ansible_host }}:6443;
+{% endfor %}   
+  }
+
+  server {
+    listen 6443;
+    proxy_pass k3s_servers;
+  }
+}

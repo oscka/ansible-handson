@@ -1,0 +1,9 @@
+---
+
+- name: Pause for 5 seconds 
+  pause:
+    seconds: 6
+
+
+- name: import k8s master
+  import_tasks: k8s/install-k8s-workers.yml

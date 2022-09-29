@@ -1,0 +1,37 @@
+; ---------------------------------------------------------------------------------------------------------------------------------------
+; On AWS
+[lb4k8s]
+lb-k8s ansible_host=13.125.134.168 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=~/.ssh/aws-private-key.pem
+
+[users]
+user-master1 ansible_host=13.124.146.34 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=~/.ssh/aws-private-key.pem
+user-master2 ansible_host=3.36.116.178 ansible_user=ubuntu ansible_port=22 ansible_ssh_private_key_file=~/.ssh/aws-private-key.pem
+
+[masters]
+master1 ansible_host=13.124.146.34 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/home/ska/.ssh/id_rsa
+master2 ansible_host=3.36.116.178 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/home/ska/.ssh/id_rsa
+
+; ---------------------------------------------------------------------------------------------------------------------------------------
+; On Vagrant
+; [lb4k8s]
+; lb-k8s ansible_host=192.168.56.23 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/oscka/ansible-handson/step6/vm-loadbalancer1/.vagrant/machines/default/virtualbox/private_key
+
+; [users]
+; user-master1 ansible_host=192.168.56.11 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/oscka/ansible-handson/step6/vm-master1/.vagrant/machines/default/virtualbox/private_key
+; user-master2 ansible_host=192.168.56.12 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/oscka/ansible-handson/step6/vm-master2/.vagrant/machines/default/virtualbox/private_key
+; user-master3 ansible_host=192.168.56.13 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/oscka/ansible-handson/step6/vm-master3/.vagrant/machines/default/virtualbox/private_key
+
+; user-worker1 ansible_host=192.168.56.21 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/oscka/ansible-handson/step6/vm-worker1/.vagrant/machines/default/virtualbox/private_key
+; user-worker2 ansible_host=192.168.56.22 ansible_user=vagrant ansible_port=22 ansible_ssh_private_key_file=/home/ska/git/oscka/ansible-handson/step6/vm-worker2/.vagrant/machines/default/virtualbox/private_key
+
+;하단의 경우 별도 계정(kube)로 실행, 계정 생성 전에는 막고 수행해야 함
+; [masters]
+; master1 ansible_host=192.168.56.11 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/home/ska/.ssh/id_rsa
+; master2 ansible_host=192.168.56.12 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/home/ska/.ssh/id_rsa
+; master3 ansible_host=192.168.56.13 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/home/ska/.ssh/id_rsa
+
+; [workers]
+; worker1 ansible_host=192.168.56.21 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/home/ska/.ssh/id_rsa
+; worker2 ansible_host=192.168.56.22 ansible_user=kube ansible_port=22 ansible_ssh_private_key_file=/home/ska/.ssh/id_rsa
+
+

@@ -1,7 +1,7 @@
 - name: My First Ansible
   hosts: step1  ## all(전체), 삭제할 경우 전체
   tasks:
-
+ 
   - name: "[pre] apt update"
     # apt:
     #   update_cache: yes

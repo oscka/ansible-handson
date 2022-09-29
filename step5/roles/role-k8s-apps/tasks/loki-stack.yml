@@ -115,7 +115,7 @@
     - demo-ex-argocd
   
 
-# pod를 재기동한 뒤(rollout restart) 적용된 결과를 한 번 다시 확인함
+# pod를 재기동한 뒤(rollout restart) 적용된 결과를 한 번 다시 확인함(단지 출력하기만 함)
 - name: promtail daemonset refresh 
   shell: |
     kubectl rollout restart  ds/{{PROMTAIL_SECRET_NAME}} -n {{PROMTAIL_NAMESPACE}}

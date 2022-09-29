@@ -7,3 +7,5 @@ user:
 
 component:
   INSTALL_ROOT: "/Users/{{ ansible_user }}/install"
+command:
+  SED_REPLACE_COMMAND: "sed -i '' 's/0.0.0.0/{{ansible_host}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig"    

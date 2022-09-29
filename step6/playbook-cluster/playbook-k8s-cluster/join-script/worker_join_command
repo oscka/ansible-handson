@@ -1,0 +1,1 @@
+kubeadm join 52.79.83.110:6443 --token qnccvr.s8czm5bq8nshldwz --discovery-token-ca-cert-hash sha256:e21bcdb23fb59217d2163eec2c65eb5a50ed3960be408a0b9b73dc0636d145a4  

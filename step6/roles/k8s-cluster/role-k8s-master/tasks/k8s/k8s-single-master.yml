@@ -1,0 +1,132 @@
+---
+
+## single master 설치 groups.masters의 첫번째 서버에만 설치 한다 
+## hosts-k8s정보에서 가져오는 방법 - {{hostvars[groups.masters.0].ansible_host}}
+- name: initialize the cluster
+  become: true
+  shell: kubeadm init --control-plane-endpoint "{{hostvars[groups.masters.0].ansible_host}}:6443"  --pod-network-cidr=192.168.0.0/16
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP   # host가 master1일 때 실행
+
+- name: create .kube directory
+  become: true
+  become_user: kube
+  file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0755
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+- name: copies admin.conf to user's kube config
+  become: true
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/kube/.kube/config
+    remote_src: yes
+    owner: kube
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+##CNI (가상 Network) 적용
+#### Calico, Canal, Clilum, Flannel, Weave등 다양항 CNI가 있다.
+#### Calico 를 적용한다 
+#### flannel : sudo kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+## Calico 기반 구축: pod-network-cidr=192.168.0.0/16
+## Flannel 기반 구축: pod-network-cidr=10.244.0.0/16
+- name: install Pod network
+  become: true
+  become_user: kube
+  shell: kubectl apply -f https://docs.projectcalico.org/v3.20/manifests/calico.yaml 
+  args:
+    chdir: $HOME
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+    
+- name: Get the token for joining the worker nodes
+  become: true
+  become_user: kube
+  shell: kubeadm token create  --print-join-command
+  register: kubernetes_join_command
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+- debug:
+    msg: "{{ kubernetes_join_command.stdout }}"
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+# playbook_dir - 실행시 playbook 위치
+# local_action -> 로컬에서 수행
+- name: Copy join command to local file.
+  local_action: copy content="{{ kubernetes_join_command.stdout_lines[0] }}" dest="{{playbook_dir}}/join-script/worker_join_command" mode=0777
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+
+- name: "k8s single master fetch remote kubeconfig"
+  ansible.builtin.fetch:
+    src: /home/kube/.kube/config
+    dest: "{{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig"
+    flat: yes  
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+# - name: "k8s  single master  kubeconfig remote.ip replace"
+#   local_action: shell
+#     sed -i '' 's/127.0.0.1/{{HOST_IP}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig
+#   # run_once: true 
+#   tags: 
+#     - k8s-single-master
+#     - k8s-cluster-single
+#   when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+
+- name: "k8s wait pod ready  "
+  shell: |
+    kubectl wait pod --timeout=-1s --for=condition=Ready -l '!job-name' -n kube-system
+  register: output
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+- name: Add kubectl completion to /home/{{ ansible_user }}/.bashrc
+  lineinfile:
+    path: /home/{{ ansible_user }}/.bashrc
+    line: |
+      source <(kubectl completion bash)
+
+      alias k=kubectl
+      complete -F __start_kubectl k
+    mode: 0644
+  tags: 
+    - k8s-single-master
+    - k8s-cluster-single
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  
+
+##### single master cluster 삭제  #######
+- name: cluster 삭제 
+  become: true
+  shell: | 
+    kubeadm reset -f
+  tags: 
+    - k8s-single-master-delete
+    - k8s-cluster-single-delete
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP  

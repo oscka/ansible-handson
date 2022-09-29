@@ -73,13 +73,20 @@
 
 - name: "kubeconfig remote.ip replace"
   local_action: shell
-    sed -i 's/0.0.0.0/{{ansible_host}}/' {{LOCAL_USER_HOME}}/.kube/k8s/kubeconfig
+    {{ command.SED_REPLACE_COMMAND }}
+  register: output
   tags: 
     - k3d-config-sed
     - k3d
     - k8s-basic
   when: ansible_distribution == 'Ubuntu'
 
+- debug:
+    var: output
+  tags: 
+    - k3d-config-sed
+    - k3d
+    - k8s-basic
 
 
 

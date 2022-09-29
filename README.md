@@ -62,7 +62,6 @@ Bringing machine 'default' up with 'virtualbox' provider...
 ~/git/oscka/ansible-handson/test-vm1
 ```
 
-
 #### ssh 접속 설정하기
 
 처음 vm을 실행하고 ansible ping을 성공하기 위해 ssh로 대상을 신뢰하는 host로 등록이 되어 있어야 합니다.
@@ -348,4 +347,4 @@ become: true      # root권한으로 실행 가능
 
 Step5에서는 k3s로 클러스터를 구성하고 argocd로 api, fe 프로젝트를 배포하며 이를 모니터링(loki, grafana, pinpoint)하는 부분까지를 설치하고 테스트 할 수 있습니다.
 
-Step5는 내용이 많아 별도의 문서로 기술합니다. [Step5](./step5/README.md)
+Step5는 내용이 많아 별도의 문서로 기술합니다. - [Step5 이동](./step5/README.md)

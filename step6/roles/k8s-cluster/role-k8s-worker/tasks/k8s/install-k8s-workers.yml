@@ -1,0 +1,41 @@
+---
+
+- name: upload join command script  to the worker nodes 
+  become: true
+  copy:
+    src: "{{playbook_dir}}/join-script/worker_join_command"
+    dest: /tmp/worker_join_command
+    mode: 0777
+  tags: 
+    - k8s-worker
+    - k8s-cluster-single
+    - k8s-cluster-multi
+      
+
+- name: Join the Worker nodes to the cluster.
+  become: true
+  command: sh /tmp/worker_join_command
+  register: output
+  tags: 
+    - k8s-worker
+    - k8s-cluster-single
+    - k8s-cluster-multi
+
+#---out---
+- debug:
+    var: output
+  tags: 
+    - k8s-worker
+    - k8s-cluster-single
+    - k8s-cluster-multi
+
+##### worker cluster 삭제  #######
+- name: master cluster 삭제 
+  become: true
+  shell: | 
+    kubeadm reset -f
+  tags: 
+    - k8s-worker-delete
+    - k8s-cluster-single-delete
+    - k8s-cluster-multi-delete
+      

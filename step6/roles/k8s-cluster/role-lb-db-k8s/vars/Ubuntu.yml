@@ -1,0 +1,15 @@
+---
+
+
+component:
+  INSTALL_ROOT: /home/{{ ansible_user }}/install
+
+docker:
+  VOLUMES_ROOT: "/docker/volumes"
+
+
+ 
+
+
+  
+
