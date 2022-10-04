@@ -1,7 +1,19 @@
 ---
 
+## vagrant 환경여부 체크
+- name: check vagrant
+  become: true
+  ansible.builtin.shell: |
+    if [ -d /home/vagrant ]; then echo 'vagrant'; else echo 'not_vagrant'; fi
+  register: vagrant_check
+  tags: 
+    - k8s-multi-master
+    - k8s-cluster-multi
+
+
 ## 원격 노드의 $HOME/ 디렉토리에서 작업하며 $HOME/cluster_initialized.txt 가 존재하지 않을 경우, shell 결과를 cluster_initialized.txt에 추가합니다.
-- name: initialize the cluster
+### vagrant 로컬환경에서는 --apiserver-advertise-address 설정해줄 필요 있음. (aws 환경에서는 추가할 필요 없음)
+- name: initialize the cluster (vagrant)
   become: true
   shell: |
     kubeadm init --control-plane-endpoint "{{hostvars[groups.lb4k8s.0].ansible_host}}:6443"  --pod-network-cidr=192.168.0.0/16 --apiserver-advertise-address={{HOST_IP}}
@@ -9,7 +21,17 @@
   tags: 
     - k8s-multi-master
     - k8s-cluster-multi
-  when: hostvars[groups.masters.0].ansible_host == HOST_IP   # master leader에서만 실행
+  when: (hostvars[groups.masters.0].ansible_host == HOST_IP) and (vagrant_check.stdout == 'vagrant')
+
+- name: initialize the cluster
+  become: true
+  hell: |
+    kubeadm init --control-plane-endpoint "{{hostvars[groups.lb4k8s.0].ansible_host}}:6443"  --pod-network-cidr=192.168.0.0/16 
+  register: output
+  tags: 
+    - k8s-multi-master
+    - k8s-cluster-multi
+  when: (hostvars[groups.masters.0].ansible_host == HOST_IP) and (vagrant_check.stdout != 'vagrant')
 
 #---out---
 - debug:
@@ -17,7 +39,7 @@
   tags: 
     - k8s-multi-master
     - k8s-cluster-multi
-  when: hostvars[groups.masters.0].ansible_host == HOST_IP 
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP # master leader에서만 실행
 
 - name: generate certificate and upload cluster
   become: true
