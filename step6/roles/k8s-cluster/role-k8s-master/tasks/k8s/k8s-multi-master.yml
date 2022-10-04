@@ -207,6 +207,7 @@
   tags: 
     - k8s-multi-master
     - k8s-cluster-multi
+  when: hostvars[groups.masters.0].ansible_host == HOST_IP 
 ## k8s kubeadmin으로 설치하면 --control-plane-endpoint로 설정하였기 때문에 아래 과정은 생략 가능 하다 
 # - name: "k8s  multi master  kubeconfig remote.ip replace"
 #   local_action: shell
