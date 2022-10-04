@@ -1,6 +1,6 @@
 ---
 
-## vagrant 환경여부 체크
+## vagrant 환경여부 체크(사용하는 곳 위마다 필요)
 - name: check vagrant
   become: true
   shell: |
@@ -23,9 +23,10 @@
     - k8s-cluster-multi
   when: (hostvars[groups.masters.0].ansible_host == HOST_IP) and (vagrant_check.stdout == 'vagrant')
 
-- name: initialize the cluster
+### vagrant가 아닐때
+- name: initialize the cluster (not vagrant)
   become: true
-  hell: |
+  shell: |
     kubeadm init --control-plane-endpoint "{{hostvars[groups.lb4k8s.0].ansible_host}}:6443"  --pod-network-cidr=192.168.0.0/16 
   register: output
   tags: 
@@ -102,6 +103,16 @@
     - k8s-cluster-multi
   when: hostvars[groups.masters.0].ansible_host != HOST_IP  # master leader가 아닐 경우만 실행
 
+## vagrant 환경여부 체크
+- name: check vagrant
+  become: true
+  shell: |
+    if [ -d /home/vagrant ]; then echo 'vagrant'; else echo 'not_vagrant'; fi
+  register: vagrant_check
+  tags: 
+    - k8s-multi-master
+    - k8s-cluster-multi
+
 ######### master_join_command  add option --apiserver-advertise-address ########
 ### vagrant 로컬환경에서는 apiserver ip 설정해줄 필요 있음.
 ### aws 환경에서는 추가할 필요 없음
@@ -111,7 +122,7 @@
   tags:
     - k8s-multi-master
     - k8s-cluster-multi
-  when: (hostvars[groups.masters.0].ansible_host != HOST_IP) and (VAGRANT_CHECK == 'vagrant')
+  when: (hostvars[groups.masters.0].ansible_host != HOST_IP) and (vagrant_check.stdout == 'vagrant')
 
 
 ######### Additional join  master 설치 ########
