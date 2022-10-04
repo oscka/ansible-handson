@@ -110,10 +110,9 @@ kube-system   kube-proxy-kgnqt                           1/1     Running    0   
 kube-system   kube-proxy-wllc9                           1/1     Running    0          44s
 kube-system   kube-scheduler-vm-master1                  1/1     Running    0          2m7s
 kube-system   kube-scheduler-vm-master2                  1/1     Running    0          31s
-    ~/g/o/ansible-handson/step6/vm-loadbalancer1  on   develop !3 
 
 # multi master의 경우 참여한 master의 role이 contol-plane으로 표시되는 지 확인합니다.
-❯ knode
+❯ kubectl get node
 NAME         STATUS   ROLES           AGE     VERSION
 vm-master1   Ready    control-plane   2m15s   v1.24.4
 vm-master2   Ready    control-plane   50s     v1.24.4
