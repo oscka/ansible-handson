@@ -92,6 +92,31 @@ Single Master 설치 작업의 내용은 다음과 같습니다.
 # 3.싱글 master설치를 위해 master2,3을 막고 아래와 같이 실행
 ./run-aws-k8s-cluster.sh "k8s-cluster-multi-pre, k8s-cluster-multi"
 
+# 설치 완료 후 다음과 같이 확인
+❯ k get pod -A
+NAMESPACE     NAME                                       READY   STATUS     RESTARTS   AGE
+kube-system   calico-kube-controllers-6799f5f4b4-jt6sz   1/1     Running    0          114s
+kube-system   calico-node-s9t5q                          0/1     Init:2/3   0          44s
+kube-system   calico-node-x4zmv                          1/1     Running    0          114s
+kube-system   coredns-6d4b75cb6d-bsbwn                   1/1     Running    0          114s
+kube-system   coredns-6d4b75cb6d-g26r9                   1/1     Running    0          114s
+kube-system   etcd-vm-master1                            1/1     Running    0          2m7s
+kube-system   etcd-vm-master2                            1/1     Running    0          33s
+kube-system   kube-apiserver-vm-master1                  1/1     Running    0          2m7s
+kube-system   kube-apiserver-vm-master2                  1/1     Running    0          23s
+kube-system   kube-controller-manager-vm-master1         1/1     Running    0          2m7s
+kube-system   kube-controller-manager-vm-master2         1/1     Running    0          34s
+kube-system   kube-proxy-kgnqt                           1/1     Running    0          114s
+kube-system   kube-proxy-wllc9                           1/1     Running    0          44s
+kube-system   kube-scheduler-vm-master1                  1/1     Running    0          2m7s
+kube-system   kube-scheduler-vm-master2                  1/1     Running    0          31s
+    ~/g/o/ansible-handson/step6/vm-loadbalancer1  on   develop !3 
+
+# multi master의 경우 참여한 master의 role이 contol-plane으로 표시되는 지 확인합니다.
+❯ knode
+NAME         STATUS   ROLES           AGE     VERSION
+vm-master1   Ready    control-plane   2m15s   v1.24.4
+vm-master2   Ready    control-plane   50s     v1.24.4
 ```
 
 loadbalancer는 docker를 설치한 뒤 ha-proxy를 띄워 클러스터 설정을 위해 각 master node를 볼 수 있도록 설정합니다.
