@@ -1,1 +1,1 @@
-kubeadm join 52.79.83.110:6443 --token qnccvr.s8czm5bq8nshldwz --discovery-token-ca-cert-hash sha256:e21bcdb23fb59217d2163eec2c65eb5a50ed3960be408a0b9b73dc0636d145a4    --control-plane --certificate-key c3afde3d7c43ae9e6d0484e2b4dbf394458318572b3b7d6ed3e058ab48bdda7b
+kubeadm join 192.168.56.23:6443 --token iiwwxm.r1fa5i42t6tfd7bs --discovery-token-ca-cert-hash sha256:036d3af128618dd97c08cbc5a26d56055e10eea4d9e0be95607326f0ba2e103e    --control-plane --certificate-key 495c71c13b9178f65b3ed9124d4c9d5de5219826b34cb18b895516877bd1ffb4
