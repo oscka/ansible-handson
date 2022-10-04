@@ -1,1 +1,1 @@
-kubeadm join 192.168.56.23:6443 --token iiwwxm.r1fa5i42t6tfd7bs --discovery-token-ca-cert-hash sha256:036d3af128618dd97c08cbc5a26d56055e10eea4d9e0be95607326f0ba2e103e    --control-plane --certificate-key 495c71c13b9178f65b3ed9124d4c9d5de5219826b34cb18b895516877bd1ffb4
+kubeadm join 192.168.56.23:6443 --token xkoeay.ofpbtkftidk8zx1a --discovery-token-ca-cert-hash sha256:306d66be6ec63495bf6105b62e5447d1ef9fe329ab8e5a616225165bbf7182e2    --control-plane --certificate-key b45db6cb4c333a478e20140653e9c3087b4e5c05b919b18159fe57d194def91d
