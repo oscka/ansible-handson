@@ -3,7 +3,7 @@
 ## vagrant 환경여부 체크
 - name: check vagrant
   become: true
-  ansible.builtin.shell: |
+  shell: |
     if [ -d /home/vagrant ]; then echo 'vagrant'; else echo 'not_vagrant'; fi
   register: vagrant_check
   tags: 
@@ -111,7 +111,7 @@
   tags:
     - k8s-multi-master
     - k8s-cluster-multi
-  when: hostvars[groups.masters.0].ansible_host != HOST_IP
+  when: (hostvars[groups.masters.0].ansible_host != HOST_IP) and (VAGRANT_CHECK == 'vagrant')
 
 
 ######### Additional join  master 설치 ########
